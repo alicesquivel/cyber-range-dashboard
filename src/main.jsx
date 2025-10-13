@@ -2,16 +2,19 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
-import App from './App.jsx'
-import InstructorDashboard from './pages/InstructorDashboard.jsx'
-import ParticipantDashboard from './pages/ParticipantDashboard.jsx'
+import Shell from './shell/Shell.jsx'
+import Overview from './pages/Overview.jsx'
+import Nodes from './pages/Nodes.jsx'
+import Stacks from './pages/Stacks.jsx'
+import Telemetry from './pages/Telemetry.jsx'
 
 const router = createBrowserRouter([
-  { path: "/", element: <App />,
+  { path: "/", element: <Shell />,
     children: [
-      { index: true, element: <ParticipantDashboard /> },
-      { path: "participant", element: <ParticipantDashboard /> },
-      { path: "instructor", element: <InstructorDashboard /> }
+      { index: true, element: <Overview /> },
+      { path: "nodes", element: <Nodes /> },
+      { path: "stacks", element: <Stacks /> },
+      { path: "telemetry", element: <Telemetry /> },
     ]
   }
 ])
