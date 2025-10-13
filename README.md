@@ -1,116 +1,48 @@
-# Cyber Range in a Box — Dashboard
+Cyber Range Simulator Pack
+==========================
 
-Minimal, production-ready React + Vite + Tailwind app with two routes:
+This package contains three components to run while your Raspberry Pis are being assembled:
 
-- `/participant` — student/participant view with KPIs, service health, topology, and events
-- `/instructor` — instructor view with team scoring, service health, automations, and events
+1. `simulator/` - a WebSocket + REST simulator that mimics nodes, telemetry, events, stacks, and scoring.
+2. `server/` - a lightweight express API that can be used as the dashboard backend (alternate to simulator).
+3. `scoring/` - a scoring poller you can run on the DMZ node (or locally) to post uptime and penalties to the API.
 
-> Built to reflect the proposal's segmented VLAN topology, DMZ/Server/Client roles, simulated internet, local registry, and scoring model (Uptime − Penalties + Report Bonus).
+Quick start (requires Node 18+ or Docker):
 
-## Quickstart
+## Using Node directly (recommended for development)
+- Run simulator:
+  cd simulator
+  npm install
+  npm start
+  # simulator available at http://localhost:4000, ws: ws://localhost:4000/ws
 
-1) **Install Node.js 18+** (or 20+).
-2) In a terminal:
-   ```bash
-   cd cyber-range-dashboard
-   npm install
-   npm run dev
-   ```
-3) Open http://localhost:5173 and use the nav to switch between Participant and Instructor.
+- Run server (alternate API):
+  cd server
+  npm install
+  npm start
+  # API available at http://localhost:4001
 
-## Tech Stack
+- Run scoring poller (demo):
+  cd scoring
+  npm install
+  SERVER_API=http://<server-ip>:4001 DVWA_URL=http://<dmz-ip> npm start
 
-- React 18 + Vite 5
-- TailwindCSS 3
-- React Router 6
+## Using Docker (one-command demo)
+- Build and run (from root of this package):
+  docker compose -f docker-compose.demo.yml up --build
 
-## Project Structure
+## Integrating with the dashboard
+- Set your dashboard `VITE_API_URL` or Vite proxy to point to `http://<simulator-host>:4000`.
+- The simulator exposes endpoints:
+  GET /api/vlan-profile
+  GET /api/nodes
+  GET /api/scoreboard
+  GET /api/events
+  GET /api/stacks
+  POST /api/events
+  POST /api/scoreboard/uptime
+  POST /api/stacks/:id/:action
 
-```text
-cyber-range-dashboard/
-├─ index.html
-├─ package.json
-├─ postcss.config.js
-├─ tailwind.config.js
-├─ vite.config.js
-└─ src/
-   ├─ main.jsx
-   ├─ App.jsx
-   ├─ index.css
-   ├─ data/
-   │  └─ mock.js
-   ├─ components/
-   │  ├─ KPI.jsx
-   │  ├─ ScoreCard.jsx
-   │  ├─ ServiceHealthTable.jsx
-   │  ├─ TopologyMap.jsx
-   │  └─ EventFeed.jsx
-   └─ pages/
-      ├─ InstructorDashboard.jsx
-      └─ ParticipantDashboard.jsx
-```
-
-## Customization Hooks
-
-- Replace `src/data/mock.js` with real data from your Pi cluster (e.g., WebSocket or REST endpoints).
-- Wire buttons in **Automation** to your orchestration API (e.g., trigger Atomic Red Team campaigns, benign traffic, or re-image scripts).
-- Expand **TopologyMap** to display live link status, VLAN IDs, and device health.
-
-## Tailwind Build Notes
-
-- No CSS frameworks beyond Tailwind.
-- Accessible defaults, minimal but clean UI; light-first, with easy path to add dark mode later.
-
-## Deploy to GitHub Pages (optional)
-
-1) Add a deployment script:
-   ```json
-   // package.json
-   {
-     "scripts": {
-       "predeploy": "npm run build",
-       "deploy": "gh-pages -d dist"
-     }
-   }
-   ```
-   and install `gh-pages`:
-   ```bash
-   npm i -D gh-pages
-   ```
-2) Set `"homepage"` or configure your repo's Pages to deploy from `/dist` using GitHub Actions.
-
-## Create GitHub Repo & Push
-
-From the project root:
-
-```bash
-git init
-git add -A
-git commit -m "feat: initial dashboard (participant + instructor)"
-# create a new repo at https://github.com/new (choose name `cyber-range-dashboard`)
-git branch -M main
-git remote add origin https://github.com/<YOUR-USERNAME>/cyber-range-dashboard.git
-git push -u origin main
-```
-
-## MIT License
-
-Copyright (c) 2025
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+## Notes
+- The simulator holds state in memory (ok for midterm/demo). For persistence, add a small sqlite or file-based store.
+- The scoring poller uses a simple "sqli_test_flag" path you can `curl` to simulate a detected SQL injection attempt.

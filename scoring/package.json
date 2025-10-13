@@ -1,0 +1,11 @@
+{
+  "name": "scoring-poller",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node poller.js"
+  },
+  "dependencies": {
+    "node-fetch": "2.6.7"
+  }
+}
