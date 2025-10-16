@@ -149,7 +149,7 @@ Copy it to `.env` and adjust if your IP plan changes.
 
 ---
 
-### 🧩 Test the API
+### Test the API
 ```bash
 curl http://10.0.0.30:4001/api/health
 curl http://10.0.0.30:4001/api/scoreboard
@@ -159,7 +159,7 @@ Each should return valid JSON confirming the service works.
 
 ---
 
-### ⚙️ Run the Poller (pi-client 10.0.0.40)
+### Run the Poller (pi-client 10.0.0.40)
 ```bash
 cd scoring
 npm install --omit=dev
@@ -189,14 +189,14 @@ This will automatically start posting points to the scoreboard.
 
 ---
 
-### 🔒 Offline & Safety Notes
+### Offline & Safety Notes
 - No component calls outside IP 10.0.0.0/24.
 - Docker images and npm packages should be pre-downloaded once and transferred via USB if necessary.
 - Never plug the GS305P into another network.
 
 ---
 
-### 🧰 Troubleshooting
+### Troubleshooting
 | Symptom | Check / Fix |
 |----------|--------------|
 | UI not loading | Run `docker ps`; ensure `cr-ui` and `cr-api` are “Up” |
@@ -207,7 +207,7 @@ This will automatically start posting points to the scoreboard.
 
 ---
 
-### 🧾 Educational Use Cases
+### Educational Use Cases
 - **Blue Team:** Monitor scores, post penalties for downtime.
 - **Red Team:** Trigger events by attacking DVWA.
 - **Instructor:** Add or subtract points manually via API.
@@ -215,7 +215,7 @@ This will automatically start posting points to the scoreboard.
 
 ---
 
-### 📁 Directory Summary
+### Directory Summary
 
 ```
 cyber-range-suite/
@@ -236,8 +236,8 @@ cyber-range-suite/
 
 ---
 
-### 📘 Credits
-Developed for the **University of Missouri Cyber Range-in-a-Box Capstone** project  
+### Credits
+Developed for the **University of Missouri Cyber Range-in-a-Box Capstone** mentor  
 by **Alicia Esquivel Morel et al.**, 2025.  
 Uses open-source software: Node.js, Express, React, Docker, Vite.  
 All components can run fully offline for educational and research use.
