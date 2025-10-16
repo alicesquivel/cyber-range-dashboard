@@ -16,7 +16,7 @@ All devices connect to the **Netgear GS305P** switch (unmanaged) with regular Ca
 
 ---
 
-## 🔧 Overview of Each Component
+## Overview of Each Component
 
 ### 1. `server/` — The API Layer
 Runs on **pi-server (10.0.0.30)** using **Node + Express**.
