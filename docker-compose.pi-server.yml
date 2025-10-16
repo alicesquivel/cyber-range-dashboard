@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  api:
+    build: ./server
+    container_name: cr-api
+    ports:
+      - "4001:4001"
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: ./server-ui.Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://10.0.0.30:4001}
+        - VITE_DMZ_URL=${VITE_DMZ_URL:-http://10.0.0.20}
+    container_name: cr-ui
+    ports:
+      - "8081:80"
+    depends_on:
+      - api
+    restart: unless-stopped
