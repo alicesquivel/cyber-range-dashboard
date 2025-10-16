@@ -237,7 +237,6 @@ cyber-range-suite/
 ---
 
 ### Credits
-Developed for the **University of Missouri Cyber Range-in-a-Box Capstone** mentor  
-by **Alicia Esquivel Morel et al.**, 2025.  
+Developed for the **University of Missouri Cyber Range-in-a-Box Capstone**, 2025.  
 Uses open-source software: Node.js, Express, React, Docker, Vite.  
 All components can run fully offline for educational and research use.
