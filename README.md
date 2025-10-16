@@ -114,9 +114,9 @@ Copy it to `.env` and adjust if your IP plan changes.
 
 ---
 
-## ⚙️ Step-by-Step Setup (for Students)
+## Step-by-Step Setup 
 
-### 🖥️ Hardware Prep
+### Hardware Prep
 1. Label Pis: **pi-router**, **pi-dmz**, **pi-server**, **pi-client**.
 2. Plug all Pis and your laptop into the **Netgear GS305P** switch.
 3. Power each Pi with its USB-C adapter.
@@ -124,14 +124,14 @@ Copy it to `.env` and adjust if your IP plan changes.
 
 ---
 
-### 🌐 Network Configuration Summary
+### Network Configuration Summary
 - Each Pi uses **static IPs** (see table above).
 - Router Pi (`pi-router`) handles DHCP/DNS using `dnsmasq`.
 - All traffic stays **within the 10.0.0.0/24 subnet** — no Internet access.
 
 ---
 
-### 🚀 Deploy the Dashboard (pi-server 10.0.0.30)
+### Deploy the Dashboard (pi-server 10.0.0.30)
 1. Copy the unzipped folder (`cyber-range-suite/`) onto the Pi.
 2. From that directory:
    ```bash
@@ -169,7 +169,7 @@ This will automatically start posting points to the scoreboard.
 
 ---
 
-### 🧠 How It All Fits Together
+### How It All Fits Together
 
 ```
  [pi-client]───┐
