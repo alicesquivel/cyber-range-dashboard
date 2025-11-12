@@ -1,35 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react";
+import TopNav from "./components/layout/TopNav.jsx";
+import Tabs from "./components/layout/Tabs.jsx";
+import OverviewTab from "./components/overview/OverviewTab.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activeTab, setActiveTab] = useState("Overview");
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="min-h-screen bg-background text-slate-100">
+      <TopNav />
+
+      <main className="mx-auto max-w-6xl px-6 py-6">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-slate-50">
+              Cyber Range Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-slate-400">
+              Overview of Raspberry Pi nodes, scores, and lab activity.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <Tabs activeTab={activeTab} onChange={setActiveTab} />
+        </div>
+
+        <div className="mt-6">
+          {activeTab === "Overview" && <OverviewTab />}
+
+          {activeTab === "Network & Nodes" && (
+            <p className="text-sm text-slate-400">
+              Network & Nodes tab – we will build this next.
+            </p>
+          )}
+
+          {activeTab === "Scores & Events" && (
+            <p className="text-sm text-slate-400">
+              Scores & Events tab – coming after Network & Nodes.
+            </p>
+          )}
+        </div>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
