@@ -3,6 +3,7 @@ import TopNav from "./components/layout/TopNav.jsx";
 import Tabs from "./components/layout/Tabs.jsx";
 import OverviewTab from "./components/overview/OverviewTab.jsx";
 import NetworkTab from "./components/network/NetworkTab.jsx";
+import ScoresTab from "./components/scores/ScoresTab.jsx";
 
 function App() {
   const [activeTab, setActiveTab] = useState("Overview");
@@ -32,11 +33,7 @@ function App() {
 
           {activeTab === "Network & Nodes" && <NetworkTab />}
 
-          {activeTab === "Scores & Events" && (
-            <p className="text-sm text-slate-400">
-              Scores & Events tab – coming after Network & Nodes.
-            </p>
-          )}
+          {activeTab === "Scores & Events" && <ScoresTab />}
         </div>
       </main>
     </div>
