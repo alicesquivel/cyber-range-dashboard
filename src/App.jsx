@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import TopNav from "./components/layout/TopNav.jsx";
 import Tabs from "./components/layout/Tabs.jsx";
 import OverviewTab from "./components/overview/OverviewTab.jsx";
+import NetworkTab from "./components/network/NetworkTab.jsx";
 
 function App() {
   const [activeTab, setActiveTab] = useState("Overview");
@@ -29,11 +30,7 @@ function App() {
         <div className="mt-6">
           {activeTab === "Overview" && <OverviewTab />}
 
-          {activeTab === "Network & Nodes" && (
-            <p className="text-sm text-slate-400">
-              Network & Nodes tab – we will build this next.
-            </p>
-          )}
+          {activeTab === "Network & Nodes" && <NetworkTab />}
 
           {activeTab === "Scores & Events" && (
             <p className="text-sm text-slate-400">
