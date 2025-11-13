@@ -1,302 +1,330 @@
-import React, { useState } from "react";
+// src/components/challenges/ChallengeDetailDrawer.jsx
+import React, { useState, useEffect, useRef } from "react";
 import { PACKS } from "./challengesContent.js";
-import { submitFlag } from "../../api/flags.js";
 
-function packLabel(packId) {
-  const pack = PACKS.find((p) => p.id === packId);
-  return pack ? pack.name : "Unassigned pack";
-}
-
-function packDescription(packId) {
-  const pack = PACKS.find((p) => p.id === packId);
-  return pack ? pack.description : "";
-}
-
-function artifactBadge(art) {
-  const base =
-    "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide";
-  if (art.type === "pcap") return base + " bg-sky-500/10 text-sky-300";
-  if (art.type === "logs") return base + " bg-amber-500/10 text-amber-300";
-  if (art.type === "pdf") return base + " bg-rose-500/10 text-rose-300";
-  if (art.type === "script")
-    return base + " bg-emerald-500/10 text-emerald-300";
-  return base + " bg-slate-700 text-slate-300";
-}
-
-/**
- * Detail drawer for a single challenge.
- *
- * Props:
- * - challenge: challenge object from CHALLENGES, or null
- * - viewMode: "student" | "instructor"
- * - isSolved: boolean (solved locally in this browser)
- * - onMarkSolved: () => void
- * - onClearSolved: () => void
- * - onClose: () => void
- */
 export default function ChallengeDetailDrawer({
   challenge,
   viewMode,
   isSolved,
+  isOpen,
   onMarkSolved,
   onClearSolved,
   onClose,
 }) {
-  const [flagInput, setFlagInput] = useState("");
-  const [flagStatus, setFlagStatus] = useState(null); // {status, message}
-  const [submitting, setSubmitting] = useState(false);
+  const [flagGuess, setFlagGuess] = useState("");
+  const [flagStatus, setFlagStatus] = useState(null);
+  const containerRef = useRef(null);
 
+  // Auto-scroll when the drawer opens
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      containerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [isOpen]);
+
+  // Reset flag status when challenge changes
+  useEffect(() => {
+    setFlagGuess("");
+    setFlagStatus(null);
+  }, [challenge?.id]);
+
+  if (!challenge) return null;
+
+  const pack = PACKS.find((p) => p.id === challenge.packId);
   const isInstructor = viewMode === "instructor";
 
-  if (!challenge) {
-    return (
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-100">
-          Challenge details
-        </h2>
-        <p className="mt-1 text-xs text-slate-400">
-          Click &ldquo;View details&rdquo; on any challenge to see a fuller
-          description, suggested steps, and instructor notes.
-        </p>
-      </section>
-    );
-  }
+  // Filter artifacts based on audience and current viewMode
+  const visibleArtifacts = (challenge.artifacts || []).filter((a) => {
+    if (a.audience === "instructor" && viewMode !== "instructor") return false;
+    // student-only is fine in both student and instructor view
+    return true;
+  });
 
-  async function handleFlagSubmit(e) {
+  function handleSubmitFlag(e) {
     e.preventDefault();
-    setSubmitting(true);
-    try {
-      const result = await submitFlag(challenge.id, flagInput);
-      setFlagStatus(result);
 
-      if (result.status === "correct" && !isSolved && onMarkSolved) {
-        onMarkSolved();
-      }
-    } finally {
-      setSubmitting(false);
+    if (!flagGuess.trim()) {
+      setFlagStatus({
+        ok: false,
+        message: "Please enter a flag guess first.",
+      });
+      return;
+    }
+
+    // Demo: accept anything that matches FLAG{something}
+    if (/^FLAG\{.+\}$/i.test(flagGuess.trim())) {
+      setFlagStatus({
+        ok: true,
+        message:
+          "Demo check passed. In a real range this would contact the scoreboard.",
+      });
+      if (onMarkSolved) onMarkSolved();
+    } else {
+      setFlagStatus({
+        ok: false,
+        message: "Flags should use the format FLAG{example-demo-flag}.",
+      });
     }
   }
 
-  // Filter artifacts based on audience (student vs instructor).
-  const baseArtifacts = challenge.artifacts || [];
-  const visibleArtifacts = baseArtifacts.filter((art) => {
-    if (art.audience === "instructor" && !isInstructor) return false;
-    return true; // "student", "both", or undefined
-  });
-
-  const basePath = `/challenges/${challenge.id}/`;
-
   return (
-    <section
-      className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-sm
-                 transition-all duration-200 ease-out translate-y-0 opacity-100"
+    <div
+      ref={containerRef}
+      className={
+        "transition-all duration-300 ease-out overflow-hidden " +
+        (isOpen
+          ? "mt-3 max-h-[1200px] opacity-100 translate-y-0"
+          : "mt-0 max-h-0 opacity-0 -translate-y-2 pointer-events-none")
+      }
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="text-sm font-semibold text-slate-100">
-            {challenge.title}
-          </h2>
-          <p className="text-[11px] text-slate-400">
-            ID: <span className="font-mono">{challenge.id}</span> •{" "}
-            {challenge.category} • {challenge.difficulty} • {challenge.points}{" "}
-            pts
-          </p>
-          <p className="text-[11px] text-slate-400">
-            Pack:{" "}
-            <span className="font-semibold text-slate-200">
-              {packLabel(challenge.packId)}
-            </span>
-          </p>
-          {isSolved && (
-            <p className="text-[11px] font-semibold text-emerald-400">
-              Solved in this browser - local progress only (not the official
-              scoreboard).
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4 shadow-sm">
+        {/* Header row */}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-100">
+              {challenge.title}
+            </h3>
+            <p className="mt-1 text-[11px] text-slate-400">
+              ID:{" "}
+              <span className="font-mono lowercase text-slate-300">
+                {challenge.id}
+              </span>{" "}
+              • {challenge.category} • {challenge.points} pts
             </p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-full border border-slate-600 px-2 py-0.5 text-[11px] text-slate-200 hover:bg-slate-800"
-        >
-          Close
-        </button>
-      </div>
+            {pack && (
+              <p className="text-[11px] text-slate-400">
+                Pack:{" "}
+                <span className="font-semibold text-slate-200">
+                  {pack.name}
+                </span>
+              </p>
+            )}
+          </div>
 
-      {/* Description */}
-      <div className="mt-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          Description
-        </h3>
-        <p className="mt-1 text-xs text-slate-200">{challenge.summary}</p>
-      </div>
-
-      {/* Pack description */}
-      <div className="mt-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          Mission pack
-        </h3>
-        <p className="mt-1 text-xs text-slate-200">
-          {packDescription(challenge.packId) || "Pack description TBD."}
-        </p>
-      </div>
-
-      {/* Student hint */}
-      <div className="mt-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          Hint for students
-        </h3>
-        <p className="mt-1 text-xs text-slate-200">{challenge.studentHint}</p>
-      </div>
-
-      {/* Suggested lab steps */}
-      <div className="mt-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          Suggested lab steps
-        </h3>
-        <ul className="mt-1 list-disc space-y-1 pl-5 text-xs text-slate-200">
-          <li>
-            TODO(Max): replace these bullets with the actual step-by-step
-            instructions from the lab handout.
-          </li>
-          <li>
-            Example - connect to the correct Pi, run the required tools, capture
-            evidence (screenshots, logs).
-          </li>
-          <li>
-            Example - document what you found and submit according to the lab
-            rubric.
-          </li>
-        </ul>
-      </div>
-
-      {/* Artifacts & downloads */}
-      <div className="mt-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          Artifacts & downloads
-        </h3>
-
-        {visibleArtifacts.length === 0 ? (
-          <p className="mt-1 text-xs text-slate-200">
-            No downloadable artifacts are configured yet for this challenge.
-            TODO(Jake/Max): add files under{" "}
-            <span className="font-mono">public/challenges/{challenge.id}/</span>{" "}
-            and update <span className="font-mono">challengesContent.js</span>.
-          </p>
-        ) : (
-          <ul className="mt-2 space-y-2 text-xs text-slate-200">
-            {visibleArtifacts.map((art, idx) => (
-              <li
-                key={idx}
-                className="flex items-center justify-between gap-3 rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2"
-              >
-                <div className="space-y-1">
-                  <p className="text-xs text-slate-100">{art.label}</p>
-                  <p className="text-[10px] text-slate-500">
-                    {isInstructor && art.audience === "instructor"
-                      ? "Instructor-only artifact"
-                      : "Download and use this as part of your investigation."}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1 text-right">
-                  <span>{artifactBadge(art)}</span>
-                  <a
-                    href={basePath + art.filename}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[11px] text-sky-300 underline underline-offset-2 hover:text-sky-200"
-                  >
-                    Download
-                  </a>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <p className="mt-2 text-[10px] text-slate-500">
-          Files are served from{" "}
-          <span className="font-mono">public/challenges/{challenge.id}/</span>.
-          In production, you can move these to an object store or LMS if needed.
-        </p>
-      </div>
-
-      {/* Flag submission (demo only) */}
-      <div className="mt-4 rounded-xl border border-slate-700 bg-slate-950/70 p-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          Flag submission - demo only
-        </h3>
-        <p className="mt-1 text-[11px] text-slate-400">
-          This demo uses a local mock API. In the real range, flags will be sent
-          to the scoreboard backend. Do not put real assessment flags here.
-        </p>
-
-        <form onSubmit={handleFlagSubmit} className="mt-2 space-y-2 text-xs">
-          <input
-            type="text"
-            value={flagInput}
-            onChange={(e) => setFlagInput(e.target.value)}
-            placeholder="FLAG{example-demo-flag}"
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200 placeholder:text-slate-500"
-          />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-slate-200 disabled:cursor-wait disabled:opacity-70"
-          >
-            {submitting ? "Checking..." : "Submit flag (demo)"}
-          </button>
-        </form>
-
-        {flagStatus && (
-          <p
-            className={
-              "mt-2 text-[11px] " +
-              (flagStatus.status === "correct"
-                ? "text-emerald-400"
-                : flagStatus.status === "incorrect"
-                ? "text-rose-400"
-                : "text-slate-300")
-            }
-          >
-            {flagStatus.message}
-          </p>
-        )}
-      </div>
-
-      {/* Instructor controls */}
-      {isInstructor && (
-        <div className="mt-4 rounded-xl border border-slate-700 bg-slate-950/80 p-3">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-            Instructor controls (local only)
-          </h3>
-          <p className="mt-1 text-[11px] text-slate-300">
-            These buttons mark progress only in this browser. They are useful
-            for demos or testing. In production, map challenge IDs to your
-            scoreboard backend instead.
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+          <div className="flex flex-col items-end gap-2">
+            {isSolved && (
+              <span className="inline-flex rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                Marked solved (local)
+              </span>
+            )}
             <button
               type="button"
-              onClick={onMarkSolved}
-              className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-300 hover:bg-emerald-500/20"
+              onClick={onClose}
+              className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-[11px] font-semibold text-slate-200 hover:border-slate-500"
             >
-              Mark as solved (local)
-            </button>
-            <button
-              type="button"
-              onClick={onClearSolved}
-              className="rounded-full bg-slate-700 px-3 py-1 text-slate-200 hover:bg-slate-600"
-            >
-              Clear solved status
+              Close
             </button>
           </div>
-          <p className="mt-2 text-[10px] text-slate-500">
-            TODO(Alicia/Josh): Replace this with real instructor tools once the
-            FastAPI scoreboard and student identity are wired in.
-          </p>
         </div>
-      )}
-    </section>
+
+        {/* Description / mission / hints */}
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="space-y-3 text-xs text-slate-300">
+            <SectionHeading>DESCRIPTION</SectionHeading>
+            <p>{challenge.summary}</p>
+
+            <SectionHeading>MISSION PACK</SectionHeading>
+            <p>
+              Investigate and complete this challenge as part of{" "}
+              <span className="font-semibold">
+                {pack ? pack.name : "this mission pack"}
+              </span>
+              .
+            </p>
+
+            {challenge.studentHint && (
+              <>
+                <SectionHeading>HINT FOR STUDENTS</SectionHeading>
+                <p>{challenge.studentHint}</p>
+              </>
+            )}
+          </div>
+
+          <div className="space-y-3 text-xs text-slate-300">
+            <SectionHeading>SUGGESTED LAB STEPS</SectionHeading>
+            <ul className="list-disc space-y-1 pl-4 text-[11px] text-slate-300">
+              <li>
+                TODO(Max): replace these bullets with the actual step-by-step
+                instructions from the lab handout.
+              </li>
+              <li>
+                Example – connect to the correct Pi, run the required tools,
+                capture evidence (screenshots, logs, PCAPs).
+              </li>
+              <li>
+                Example – document what you found and submit according to the
+                lab rubric.
+              </li>
+            </ul>
+
+            {isInstructor && challenge.instructorNotes && (
+              <>
+                <SectionHeading>INSTRUCTOR NOTES</SectionHeading>
+                <p className="text-[11px] text-amber-200/90">
+                  {challenge.instructorNotes}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Artifacts & downloads */}
+        {visibleArtifacts.length > 0 && (
+          <section className="mt-4">
+            <SectionHeading>ARTIFACTS & DOWNLOADS</SectionHeading>
+            <p className="mb-2 text-[11px] text-slate-400">
+              Files are served from{" "}
+              <code className="font-mono">
+                public/challenges/{challenge.id}/
+              </code>
+              . In production, you can move these to an object store or LMS if
+              needed.
+            </p>
+
+            <div className="space-y-2">
+              {visibleArtifacts.map((a) => (
+                <ArtifactRow
+                  key={a.filename}
+                  challengeId={challenge.id}
+                  artifact={a}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Flag submission demo */}
+        <section className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">
+              Flag submission – demo only
+            </h4>
+            <p className="text-[10px] text-slate-400">
+              This uses a local mock check. In the real range, flags will be
+              validated by the scoreboard backend.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmitFlag} className="mt-3 space-y-2">
+            <label className="text-[11px] font-mono text-slate-300">
+              Enter flag guess:
+            </label>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                type="text"
+                value={flagGuess}
+                onChange={(e) => setFlagGuess(e.target.value)}
+                placeholder="FLAG{example-demo-flag}"
+                className="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-[12px] font-mono text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-lg bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-slate-200"
+              >
+                Submit flag (demo)
+              </button>
+            </div>
+
+            <div className="rounded-md bg-slate-900/80 px-2 py-1 text-[11px] font-mono text-slate-300">
+              Example format:{" "}
+              <span className="text-sky-300">
+                FLAG&#123;example-demo-flag&#125;
+              </span>
+            </div>
+
+            {flagStatus && (
+              <p
+                className={
+                  "text-[11px] " +
+                  (flagStatus.ok ? "text-emerald-300" : "text-rose-300")
+                }
+              >
+                {flagStatus.message}
+              </p>
+            )}
+          </form>
+        </section>
+
+        {/* Local solved controls at bottom (optional) */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+          <span>
+            Local solved tracking does not affect the official scoreboard.
+          </span>
+          <div className="flex gap-2">
+            {!isSolved && (
+              <button
+                type="button"
+                onClick={onMarkSolved}
+                className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-200 hover:border-emerald-400"
+              >
+                Mark solved (local)
+              </button>
+            )}
+            {isSolved && (
+              <button
+                type="button"
+                onClick={onClearSolved}
+                className="rounded-full border border-slate-600 bg-slate-900 px-3 py-1 text-[11px] font-semibold text-slate-200 hover:border-slate-400"
+              >
+                Clear solved
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeading({ children }) {
+  return (
+    <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+      {children}
+    </h4>
+  );
+}
+
+function ArtifactRow({ challengeId, artifact }) {
+  const href = `/challenges/${challengeId}/${artifact.filename}`;
+
+  let typeLabel = artifact.type || "file";
+  if (typeLabel === "pcap") typeLabel = "PCAP";
+  if (typeLabel === "logs") typeLabel = "Logs";
+  if (typeLabel === "pdf") typeLabel = "PDF";
+
+  const typeIcon =
+    artifact.type === "pcap"
+      ? ""
+      : artifact.type === "logs"
+      ? ""
+      : artifact.type === "pdf"
+      ? ""
+      : "";
+
+  return (
+    <div className="flex flex-col items-start justify-between gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 text-[11px] text-slate-300 sm:flex-row sm:items-center">
+      <div>
+        <div className="flex items-center gap-2">
+          <span>{typeIcon}</span>
+          <span className="font-semibold text-slate-100">{artifact.label}</span>
+          <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+            {typeLabel}
+          </span>
+        </div>
+        <p className="mt-1 text-[10px] text-slate-400">
+          Download and use this as part of your investigation.
+        </p>
+      </div>
+      <a
+        href={href}
+        className="rounded-full border border-slate-600 bg-slate-900 px-3 py-1 text-[11px] font-semibold text-slate-100 hover:border-slate-400"
+      >
+        Download
+      </a>
+    </div>
   );
 }

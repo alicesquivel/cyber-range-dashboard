@@ -3,15 +3,18 @@ import React, { useState, useMemo, useEffect } from "react";
 import { CHALLENGES, PACKS } from "./challengesContent.js";
 import ChallengeDetailDrawer from "./ChallengeDetailDrawer.jsx";
 
-const STORAGE_KEY = "crab_solved_challenges_v1";
+const SOLVED_STORAGE_KEY = "crab_solved_challenges_v1";
+const STATUS_STORAGE_KEY = "crab_challenge_status_overrides_v1";
 
 const difficultyOrder = { easy: 0, medium: 1, hard: 2 };
+
+// -------- localStorage helpers --------
 
 function loadSolvedFromStorage() {
   if (typeof window === "undefined") return new Set();
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(SOLVED_STORAGE_KEY);
     if (!raw) return new Set();
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return new Set();
@@ -27,27 +30,107 @@ function saveSolvedToStorage(solvedSet) {
   if (typeof window === "undefined") return;
   try {
     const arr = Array.from(solvedSet);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    window.localStorage.setItem(SOLVED_STORAGE_KEY, JSON.stringify(arr));
   } catch {
-    // ignore storage errors
+    // ignore
   }
+}
+
+function loadStatusOverridesFromStorage() {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(STATUS_STORAGE_KEY);
+    if (!raw) return {};
+    const obj = JSON.parse(raw);
+    if (!obj || typeof obj !== "object") return {};
+    return obj;
+  } catch {
+    return {};
+  }
+}
+
+function saveStatusOverridesToStorage(overrides) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(overrides));
+  } catch {
+    // ignore
+  }
+}
+
+// base status from content + override map
+function getEffectiveStatus(challenge, overrides) {
+  return overrides[challenge.id] || challenge.status || "available";
+}
+
+// small difficulty dot indicator
+function DifficultyDots({ level }) {
+  let filled = 0;
+  if (level === "easy") filled = 1;
+  else if (level === "medium") filled = 2;
+  else if (level === "hard") filled = 3;
+
+  return (
+    <div className="flex items-center gap-1 text-[10px]">
+      {[1, 2, 3].map((i) => (
+        <span
+          key={i}
+          className={
+            "inline-block h-1.5 w-1.5 rounded-full " +
+            (i <= filled ? "bg-emerald-400" : "bg-slate-600")
+          }
+        />
+      ))}
+      <span className="capitalize text-slate-400">{level}</span>
+    </div>
+  );
+}
+
+function statusBadgeStyles(status) {
+  if (status === "available") {
+    return {
+      label: "Available",
+      className: "bg-emerald-500/10 text-emerald-300",
+    };
+  }
+  if (status === "locked") {
+    return {
+      label: "Locked",
+      className: "bg-amber-500/10 text-amber-300",
+    };
+  }
+  if (status === "hidden") {
+    return {
+      label: "Hidden from students",
+      className: "bg-rose-500/10 text-rose-300",
+    };
+  }
+  return {
+    label: "Status unknown",
+    className: "bg-slate-700 text-slate-300",
+  };
 }
 
 export default function ChallengesTab({ viewMode }) {
   const [selectedPack, setSelectedPack] = useState("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [activeChallengeId, setActiveChallengeId] = useState(null);
-
-  // store solved IDs in a Set
   const [solvedSet, setSolvedSet] = useState(() => new Set());
-
-  // load from localStorage on mount
-  useEffect(() => {
-    setSolvedSet(loadSolvedFromStorage());
-  }, []);
+  const [statusOverrides, setStatusOverrides] = useState(() => ({}));
+  const [previewAsStudent, setPreviewAsStudent] = useState(false);
 
   const isInstructor = viewMode === "instructor";
+  const effectiveViewMode =
+    isInstructor && previewAsStudent ? "student" : viewMode;
+  const isStudentView = effectiveViewMode === "student";
 
+  // load stored state
+  useEffect(() => {
+    setSolvedSet(loadSolvedFromStorage());
+    setStatusOverrides(loadStatusOverridesFromStorage());
+  }, []);
+
+  // sorted challenges (deterministic order)
   const sortedChallenges = useMemo(() => {
     return [...CHALLENGES].sort((a, b) => {
       const packA = PACKS.find((p) => p.id === a.packId)?.name || "";
@@ -63,10 +146,16 @@ export default function ChallengesTab({ viewMode }) {
     });
   }, []);
 
+  // filter by pack/difficulty + status (student view hides hidden)
   const visibleChallenges = sortedChallenges.filter((ch) => {
+    const status = getEffectiveStatus(ch, statusOverrides);
+
     if (selectedPack !== "all" && ch.packId !== selectedPack) return false;
     if (selectedDifficulty !== "all" && ch.difficulty !== selectedDifficulty)
       return false;
+
+    if (isStudentView && status === "hidden") return false;
+
     return true;
   });
 
@@ -75,7 +164,7 @@ export default function ChallengesTab({ viewMode }) {
   const progressPct =
     totalChallenges > 0 ? Math.round((solvedCount / totalChallenges) * 100) : 0;
 
-  // per-pack stats for the tiny progress bars
+  // per-pack solved stats
   const packStats = useMemo(() => {
     const base = PACKS.map((p) => ({
       id: p.id,
@@ -113,6 +202,19 @@ export default function ChallengesTab({ viewMode }) {
     });
   }
 
+  function handleSetStatusOverride(id, status) {
+    setStatusOverrides((prev) => {
+      const next = { ...prev };
+      if (status === "reset") {
+        delete next[id];
+      } else {
+        next[id] = status;
+      }
+      saveStatusOverridesToStorage(next);
+      return next;
+    });
+  }
+
   const activeChallenge =
     CHALLENGES.find((c) => c.id === activeChallengeId) || null;
 
@@ -122,20 +224,21 @@ export default function ChallengesTab({ viewMode }) {
       <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-xs text-slate-300">
         {isInstructor ? (
           <p>
-            Instructor view - use this tab to track which challenges are solved,
-            peek at artifacts, and test the flag submission flow before wiring a
-            real backend.
+            Instructor view. Use this tab to manage challenge visibility
+            (available, locked, hidden), review artifacts, and test flag
+            submission. Status controls are local to this browser for now and do
+            not change the backend.
           </p>
         ) : (
           <p>
-            Student view - work through the challenges and mark them as solved
-            as you go. This progress is stored only in this browser and does not
-            affect the official scoreboard.
+            Student view. Work through the challenges and mark them as solved as
+            you go. Local progress and status behavior here does not affect the
+            official scoreboard.
           </p>
         )}
       </div>
 
-      {/* Progress summary + per-pack mini bars */}
+      {/* Progress summary + per-pack bars + preview toggle */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -147,11 +250,29 @@ export default function ChallengesTab({ viewMode }) {
               this browser ({progressPct}%).
             </p>
           </div>
-          <div className="text-[11px] text-slate-400">
-            View mode:{" "}
-            <span className="font-semibold text-slate-200">
-              {isInstructor ? "Instructor" : "Student"}
-            </span>
+
+          <div className="flex flex-col items-start gap-1 text-[11px] text-slate-400 sm:items-end">
+            <div>
+              View mode:{" "}
+              <span className="font-semibold text-slate-200">
+                {isInstructor
+                  ? previewAsStudent
+                    ? "Instructor (previewing student)"
+                    : "Instructor"
+                  : "Student"}
+              </span>
+            </div>
+            {isInstructor && (
+              <button
+                type="button"
+                onClick={() => setPreviewAsStudent((prev) => !prev)}
+                className="mt-1 rounded-full border border-slate-600 bg-slate-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-200 hover:border-slate-400"
+              >
+                {previewAsStudent
+                  ? "Show instructor view"
+                  : "Preview as student"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -162,7 +283,6 @@ export default function ChallengesTab({ viewMode }) {
           />
         </div>
 
-        {/* tiny per-pack bars */}
         <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           {packStats.map((stat) => {
             if (!stat.total) return null;
@@ -245,11 +365,16 @@ export default function ChallengesTab({ viewMode }) {
           const solved = solvedSet.has(ch.id);
           const isActive = activeChallengeId === ch.id;
 
+          const effectiveStatus = getEffectiveStatus(ch, statusOverrides);
+          const statusInfo = statusBadgeStyles(effectiveStatus);
+          const isLockedForStudent =
+            isStudentView && effectiveStatus === "locked";
+
           return (
             <React.Fragment key={ch.id}>
               <article className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  {/* LEFT SIDE: compact info */}
+                  {/* left side */}
                   <div className="space-y-1">
                     <h3 className="text-sm font-semibold text-slate-100">
                       {ch.title}
@@ -260,7 +385,7 @@ export default function ChallengesTab({ viewMode }) {
                       <span className="font-mono lowercase text-slate-300">
                         {ch.id}
                       </span>{" "}
-                      • {ch.category} • {ch.difficulty} • {ch.points} pts
+                      • {ch.category} • {ch.points} pts
                     </p>
 
                     {pack && (
@@ -272,7 +397,8 @@ export default function ChallengesTab({ viewMode }) {
                       </p>
                     )}
 
-                    {/* short summary only */}
+                    <DifficultyDots level={ch.difficulty} />
+
                     {ch.summary && (
                       <p className="mt-1 text-xs text-slate-300">
                         {ch.summary}
@@ -280,8 +406,19 @@ export default function ChallengesTab({ viewMode }) {
                     )}
                   </div>
 
-                  {/* RIGHT SIDE: status + buttons */}
+                  {/* right side: status, solved, controls */}
                   <div className="flex flex-col items-start gap-2 text-xs sm:items-end">
+                    {/* availability status */}
+                    <span
+                      className={
+                        "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
+                        statusInfo.className
+                      }
+                    >
+                      {statusInfo.label}
+                    </span>
+
+                    {/* solved status */}
                     <span
                       className={
                         "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
@@ -295,16 +432,29 @@ export default function ChallengesTab({ viewMode }) {
                         : "Not yet solved here"}
                     </span>
 
+                    {/* details button */}
                     <button
                       type="button"
-                      onClick={() =>
-                        setActiveChallengeId(isActive ? null : ch.id)
+                      disabled={isLockedForStudent}
+                      onClick={() => {
+                        if (isLockedForStudent) return;
+                        setActiveChallengeId(isActive ? null : ch.id);
+                      }}
+                      className={
+                        "rounded-full px-3 py-1 text-[11px] font-semibold " +
+                        (isLockedForStudent
+                          ? "cursor-not-allowed border border-slate-700 bg-slate-800 text-slate-400"
+                          : "bg-slate-100 text-slate-900 hover:bg-slate-200")
                       }
-                      className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-slate-200"
                     >
-                      {isActive ? "Hide details" : "View full details"}
+                      {isLockedForStudent
+                        ? "Locked"
+                        : isActive
+                        ? "Hide details"
+                        : "View full details"}
                     </button>
 
+                    {/* solved toggle */}
                     {solved ? (
                       <button
                         type="button"
@@ -322,39 +472,69 @@ export default function ChallengesTab({ viewMode }) {
                         Mark solved (local)
                       </button>
                     )}
+
+                    {/* instructor status controls */}
+                    {isInstructor && (
+                      <div className="mt-1 flex flex-wrap items-center justify-end gap-1 text-[10px] text-slate-400">
+                        <span className="mr-1">Status controls:</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleSetStatusOverride(ch.id, "available")
+                          }
+                          className="rounded-full border border-slate-600 bg-slate-900 px-2 py-0.5 hover:border-emerald-400"
+                        >
+                          Set available
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleSetStatusOverride(ch.id, "locked")
+                          }
+                          className="rounded-full border border-slate-600 bg-slate-900 px-2 py-0.5 hover:border-amber-400"
+                        >
+                          Lock
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleSetStatusOverride(ch.id, "hidden")
+                          }
+                          className="rounded-full border border-slate-600 bg-slate-900 px-2 py-0.5 hover:border-rose-400"
+                        >
+                          Hide from students
+                        </button>
+                        {statusOverrides[ch.id] && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleSetStatusOverride(ch.id, "reset")
+                            }
+                            className="ml-1 text-[10px] text-slate-400 underline hover:text-slate-200"
+                          >
+                            Reset to default
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </article>
 
-              {/* inline detail drawer directly under this challenge */}
-              {isActive && (
-                <ChallengeDetailDrawer
-                  challenge={ch}
-                  viewMode={viewMode}
-                  isSolved={solved}
-                  onMarkSolved={() => handleMarkSolved(ch.id)}
-                  onClearSolved={() => handleClearSolved(ch.id)}
-                  onClose={() => setActiveChallengeId(null)}
-                />
-              )}
+              {/* inline drawer */}
+              <ChallengeDetailDrawer
+                challenge={ch}
+                viewMode={effectiveViewMode}
+                isSolved={solved}
+                isOpen={isActive && !isLockedForStudent}
+                onMarkSolved={() => handleMarkSolved(ch.id)}
+                onClearSolved={() => handleClearSolved(ch.id)}
+                onClose={() => setActiveChallengeId(null)}
+              />
             </React.Fragment>
           );
         })}
       </section>
-
-      {/* Detail drawer (artifacts, instructor notes, flag submission demo) */}
-      <ChallengeDetailDrawer
-        challenge={activeChallenge}
-        viewMode={viewMode}
-        isSolved={Boolean(activeChallenge && solvedSet.has(activeChallenge.id))}
-        onMarkSolved={() =>
-          activeChallenge && handleMarkSolved(activeChallenge.id)
-        }
-        onClearSolved={() =>
-          activeChallenge && handleClearSolved(activeChallenge.id)
-        }
-        onClose={() => setActiveChallengeId(null)}
-      />
     </div>
   );
 }
