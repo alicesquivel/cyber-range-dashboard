@@ -1,4 +1,5 @@
-// Josh's area later – for now, just dummy data.
+// TODO(Josh): replace dummy data with real scoreboard API output.
+
 
 export async function fetchScores() {
     // later: fetch("http://pi-server:8080/scores")

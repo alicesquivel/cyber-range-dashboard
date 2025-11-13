@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function TopNav() {
+export default function TopNav({ viewMode, onChangeViewMode }) {
   return (
     <header className="w-full border-b border-slate-800 bg-surface/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -16,6 +16,35 @@ export default function TopNav() {
               Raspberry Pi cyber range dashboard
             </p>
           </div>
+        </div>
+
+        {/* View switcher - Student vs Instructor */}
+        <div className="flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/60 p-1 text-[11px]">
+          {/* TODO(Max): style or relabel this toggle if you want different wording. */}
+          <button
+            type="button"
+            onClick={() => onChangeViewMode("student")}
+            className={
+              "rounded-full px-2 py-1 font-medium " +
+              (viewMode === "student"
+                ? "bg-slate-100 text-slate-900"
+                : "text-slate-300 hover:bg-slate-800")
+            }
+          >
+            Student
+          </button>
+          <button
+            type="button"
+            onClick={() => onChangeViewMode("instructor")}
+            className={
+              "rounded-full px-2 py-1 font-medium " +
+              (viewMode === "instructor"
+                ? "bg-slate-100 text-slate-900"
+                : "text-slate-300 hover:bg-slate-800")
+            }
+          >
+            Instructor
+          </button>
         </div>
       </div>
     </header>

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { fetchNetworkFromScoreboard } from "../../api/scoreboard.js";
 import { fetchHealth } from "../../api/telemetry.js";
+import NodeDetailPanel from "./NodeDetailPanel.jsx";
+import { getNodeDetails } from "../../content/networkNodes.js";
+import InstructorTools from "../instructor/InstructorTools.jsx";
 
-// Extra info per node – Jake/Max can tweak this later.
 const NODE_DETAILS = {
   "10.0.0.1": {
     hostname: "pi-router",
@@ -33,20 +35,45 @@ const statusBadgeClass = (status) => {
   return "bg-slate-700 text-slate-300";
 };
 
-export default function NetworkTab() {
+export default function NetworkTab({ viewMode }) {
   const [network, setNetwork] = useState([]);
   const [health, setHealth] = useState([]);
+  const [selectedIp, setSelectedIp] = useState(null);
 
   useEffect(() => {
-    fetchNetworkFromScoreboard().then(setNetwork);
-    fetchHealth().then(setHealth);
+    let cancelled = false;
+
+    async function loadData() {
+      try {
+        const [networkData, healthData] = await Promise.all([
+          fetchNetworkFromScoreboard(),
+          fetchHealth(),
+        ]);
+
+        if (!cancelled) {
+          setNetwork(networkData);
+          setHealth(healthData);
+        }
+      } catch (err) {
+        console.warn("NetworkTab polling error:", err);
+      }
+    }
+
+    loadData();
+
+    const intervalId = setInterval(loadData, 5000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
   }, []);
 
   const healthByIp = Object.fromEntries(health.map((h) => [h.ip, h.status]));
+  const isInstructor = viewMode === "instructor";
 
   return (
     <div className="space-y-4">
-      {/* Node table */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
@@ -77,7 +104,12 @@ export default function NetworkTab() {
                 const status = healthByIp[node.ip] ?? "unknown";
                 const details = NODE_DETAILS[node.ip] || {};
                 return (
-                  <tr key={node.ip}>
+                  //   <tr key={node.ip}>
+                  <tr
+                    key={node.ip}
+                    className="cursor-pointer hover:bg-slate-800/70"
+                    onClick={() => setSelectedIp(node.ip)}
+                  >
                     <td className="px-3 py-2 text-slate-100">
                       <div className="text-xs font-semibold">{node.name}</div>
                       {details.hostname && (
@@ -133,16 +165,22 @@ export default function NetworkTab() {
         </div>
       </section>
 
-      {/* Placeholder for future VLAN / ping tools */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-100">
-          Network tools (coming soon)
-        </h2>
-        <p className="mt-1 text-xs text-slate-400">
-          This section is reserved for simple tools students can add later: ping
-          tests, VLAN diagrams, or per-node telemetry panels.
-        </p>
-      </section>
+      {/* Node detail panel - shared with Overview */}
+      <NodeDetailPanel
+        node={
+          selectedIp ? network.find((n) => n.ip === selectedIp) ?? null : null
+        }
+        status={
+          selectedIp
+            ? health.find((h) => h.ip === selectedIp)?.status ?? "unknown"
+            : "unknown"
+        }
+        viewMode={viewMode}
+        onClose={() => setSelectedIp(null)}
+      />
+
+      {/* Instructor-only placeholder for future tools */}
+      {isInstructor && <InstructorTools section="Network" />}
     </div>
   );
 }

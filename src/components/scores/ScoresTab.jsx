@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchScoreSummary, fetchEvents } from "../../api/scoreboard.js";
 import { TEAM_CONFIG } from "../../content/dashboardContent.js";
+import InstructorTools from "../instructor/InstructorTools.jsx";
 
 const teamLabel = (teamKey) =>
   TEAM_CONFIG[teamKey]?.label || (teamKey ? `${teamKey} team` : "-");
@@ -12,18 +13,45 @@ const pointsClass = (points) =>
     ? "text-riskHigh"
     : "text-slate-300";
 
-export default function ScoresTab() {
+export default function ScoresTab({ viewMode }) {
   const [summary, setSummary] = useState(null);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetchScoreSummary().then(setSummary);
-    fetchEvents().then(setEvents);
+    let cancelled = false;
+
+    async function loadData() {
+      try {
+        const [summaryData, eventsData] = await Promise.all([
+          fetchScoreSummary(),
+          fetchEvents(),
+        ]);
+
+        if (!cancelled) {
+          setSummary(summaryData);
+          setEvents(eventsData);
+        }
+      } catch (err) {
+        console.warn("ScoresTab polling error:", err);
+      }
+    }
+
+    loadData();
+
+    const intervalId = setInterval(loadData, 5000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
   }, []);
 
   const total =
-    summary?.uptime ??
-    0 + (summary?.attackPenalties ?? 0) + (summary?.reportBonus ?? 0);
+    (summary?.uptime ?? 0) +
+    (summary?.attackPenalties ?? 0) +
+    (summary?.reportBonus ?? 0);
+
+  const isInstructor = viewMode === "instructor";
 
   return (
     <div className="space-y-4">
@@ -32,7 +60,7 @@ export default function ScoresTab() {
         <h2 className="text-sm font-semibold text-slate-100">Score summary</h2>
         <p className="mt-1 text-xs text-slate-400">
           Score = uptime - attack penalties + report bonus. Dummy values for
-          now; later this will mirror the official scoreboard.
+          now; later this will mirror the official scoreboard on the Server Pi.
         </p>
 
         {!summary && (
@@ -68,13 +96,20 @@ export default function ScoresTab() {
         )}
       </section>
 
-      {/* Event log table */}
+      {/* Event log - visible to both, but instructors get extra context */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-100">Score events</h2>
         <p className="mt-1 text-xs text-slate-400">
-          Each row represents a change to the score - either automatic (from
-          scripts) or manual (from instructor decisions).
+          Each row represents a change to the score - either automatic from
+          scripts or manual from instructor decisions.
         </p>
+        {isInstructor && (
+          <p className="mt-1 text-[11px] text-slate-400">
+            Instructor note: this table should match the official log that
+            explains why points changed so that students can review after the
+            exercise.
+          </p>
+        )}
 
         <div className="mt-3 overflow-hidden rounded-xl border border-slate-800">
           <table className="min-w-full text-xs">
@@ -122,6 +157,9 @@ export default function ScoresTab() {
           </table>
         </div>
       </section>
+
+      {/* Instructor-only future controls */}
+      {isInstructor && <InstructorTools section="Scores" />}
     </div>
   );
 }
