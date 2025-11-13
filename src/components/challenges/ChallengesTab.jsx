@@ -243,87 +243,101 @@ export default function ChallengesTab({ viewMode }) {
         {visibleChallenges.map((ch) => {
           const pack = PACKS.find((p) => p.id === ch.packId);
           const solved = solvedSet.has(ch.id);
+          const isActive = activeChallengeId === ch.id;
 
           return (
-            <article
-              key={ch.id}
-              className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-semibold text-slate-100">
-                    {ch.title}
-                  </h3>
-                  <p className="text-[11px] text-slate-400">
-                    ID:{" "}
-                    <span className="font-mono lowercase text-slate-300">
-                      {ch.id}
-                    </span>{" "}
-                    • {ch.category} • {ch.difficulty} • {ch.points} pts
-                  </p>
-                  {pack && (
+            <React.Fragment key={ch.id}>
+              <article className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-slate-100">
+                      {ch.title}
+                    </h3>
                     <p className="text-[11px] text-slate-400">
-                      Pack:{" "}
-                      <span className="font-semibold text-slate-200">
-                        {pack.name}
-                      </span>
-                    </p>
-                  )}
-
-                  {/* main summary */}
-                  <p className="mt-1 text-xs text-slate-300">{ch.summary}</p>
-
-                  {/* student hint surfaced on the card so it isn't hidden in the drawer */}
-                  {ch.studentHint && (
-                    <p className="mt-2 text-[11px] text-slate-400">
-                      <span className="font-semibold text-slate-300">
-                        Hint for students:
+                      ID:{" "}
+                      <span className="font-mono lowercase text-slate-300">
+                        {ch.id}
                       </span>{" "}
-                      {ch.studentHint}
+                      • {ch.category} • {ch.difficulty} • {ch.points} pts
                     </p>
-                  )}
-                </div>
+                    {pack && (
+                      <p className="text-[11px] text-slate-400">
+                        Pack:{" "}
+                        <span className="font-semibold text-slate-200">
+                          {pack.name}
+                        </span>
+                      </p>
+                    )}
 
-                <div className="flex flex-col items-start gap-2 text-xs sm:items-end">
-                  <span
-                    className={
-                      "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
-                      (solved
-                        ? "bg-emerald-500/10 text-emerald-300"
-                        : "bg-slate-700 text-slate-300")
-                    }
-                  >
-                    {solved ? "Solved in this browser" : "Not yet solved here"}
-                  </span>
+                    {/* main summary */}
+                    <p className="mt-1 text-xs text-slate-300">{ch.summary}</p>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveChallengeId(ch.id)}
-                    className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-slate-200"
-                  >
-                    View full details
-                  </button>
+                    {/* surface the student hint so it isn't hidden */}
+                    {ch.studentHint && (
+                      <p className="mt-2 text-[11px] text-slate-400">
+                        <span className="font-semibold text-slate-300">
+                          Hint for students:
+                        </span>{" "}
+                        {ch.studentHint}
+                      </p>
+                    )}
+                  </div>
 
-                  {solved ? (
+                  <div className="flex flex-col items-start gap-2 text-xs sm:items-end">
+                    <span
+                      className={
+                        "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
+                        (solved
+                          ? "bg-emerald-500/10 text-emerald-300"
+                          : "bg-slate-700 text-slate-300")
+                      }
+                    >
+                      {solved
+                        ? "Solved in this browser"
+                        : "Not yet solved here"}
+                    </span>
+
                     <button
                       type="button"
-                      onClick={() => handleClearSolved(ch.id)}
-                      className="text-[11px] text-slate-400 hover:text-slate-200"
+                      onClick={() => setActiveChallengeId(ch.id)}
+                      className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-slate-200"
                     >
-                      Clear solved status
+                      {isActive ? "Hide details" : "View full details"}
                     </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleMarkSolved(ch.id)}
-                      className="text-[11px] text-slate-400 hover:text-slate-200"
-                    >
-                      Mark solved (local)
-                    </button>
-                  )}
+
+                    {solved ? (
+                      <button
+                        type="button"
+                        onClick={() => handleClearSolved(ch.id)}
+                        className="text-[11px] text-slate-400 hover:text-slate-200"
+                      >
+                        Clear solved status
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleMarkSolved(ch.id)}
+                        className="text-[11px] text-slate-400 hover:text-slate-200"
+                      >
+                        Mark solved (local)
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
+              </article>
+
+              {/* inline detail drawer directly under this challenge */}
+              {isActive && (
+                <ChallengeDetailDrawer
+                  challenge={ch}
+                  viewMode={viewMode}
+                  isSolved={solved}
+                  onMarkSolved={() => handleMarkSolved(ch.id)}
+                  onClearSolved={() => handleClearSolved(ch.id)}
+                  onClose={() => setActiveChallengeId(null)}
+                />
+              )}
+            </React.Fragment>
           );
         })}
       </section>
