@@ -1,165 +1,168 @@
+// src/components/scores/ScoresTab.jsx
 import React, { useEffect, useState } from "react";
-import { fetchScoreSummary, fetchEvents } from "../../api/scoreboard.js";
-import { TEAM_CONFIG } from "../../content/dashboardContent.js";
-import InstructorTools from "../instructor/InstructorTools.jsx";
+import { fetchScoreSummary, fetchScoreEvents } from "../../api/scoreboard.js";
+import TeamLeaderboard from "./TeamLeaderboard.jsx";
 
-const teamLabel = (teamKey) =>
-  TEAM_CONFIG[teamKey]?.label || (teamKey ? `${teamKey} team` : "-");
-
-const pointsClass = (points) =>
-  points > 0
-    ? "text-emerald-400"
-    : points < 0
-    ? "text-riskHigh"
-    : "text-slate-300";
+function deltaClass(delta) {
+  if (delta > 0) return "text-emerald-400";
+  if (delta < 0) return "text-rose-400";
+  return "text-slate-200";
+}
 
 export default function ScoresTab({ viewMode }) {
   const [summary, setSummary] = useState(null);
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const isInstructor = viewMode === "instructor";
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadData() {
+    async function load() {
+      setLoading(true);
       try {
-        const [summaryData, eventsData] = await Promise.all([
+        const [s, e] = await Promise.all([
           fetchScoreSummary(),
-          fetchEvents(),
+          fetchScoreEvents(),
         ]);
-
         if (!cancelled) {
-          setSummary(summaryData);
-          setEvents(eventsData);
+          setSummary(s);
+          setEvents(e || []);
         }
       } catch (err) {
-        console.warn("ScoresTab polling error:", err);
+        console.warn("ScoresTab error:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
-    loadData();
-
-    const intervalId = setInterval(loadData, 5000);
+    load();
+    const id = setInterval(load, 5000); // poll every 5s
 
     return () => {
       cancelled = true;
-      clearInterval(intervalId);
+      clearInterval(id);
     };
   }, []);
 
-  const total =
-    (summary?.uptime ?? 0) +
-    (summary?.attackPenalties ?? 0) +
-    (summary?.reportBonus ?? 0);
-
-  const isInstructor = viewMode === "instructor";
-
   return (
     <div className="space-y-4">
-      {/* Score summary card */}
+      {/* Banner */}
+      <section className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-xs text-slate-300">
+        {isInstructor ? (
+          <p>
+            Instructor view - use this tab to track how uptime, attack
+            penalties, and incident reports affect each team&apos;s score.
+            Later, this will reflect the real Raspberry Pi scoreboard.
+          </p>
+        ) : (
+          <p>
+            Student view - scores are based on uptime, attack penalties, and any
+            bonus points your team earns for good incident reporting.
+          </p>
+        )}
+      </section>
+
+      {/* Leaderboard */}
+      <TeamLeaderboard viewMode={viewMode} />
+
+      {/* Score summary */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-100">Score summary</h2>
         <p className="mt-1 text-xs text-slate-400">
-          Score = uptime - attack penalties + report bonus. Dummy values for
-          now; later this will mirror the official scoreboard on the Server Pi.
+          Score = uptime − attack penalties + report bonus. These values are
+          dummy data for now; later they will mirror the official scoreboard.
         </p>
 
-        {!summary && (
-          <p className="mt-3 text-xs text-slate-500">Loading scores…</p>
+        {loading && (
+          <p className="mt-3 text-xs text-slate-400">Loading score summary…</p>
         )}
 
-        {summary && (
-          <div className="mt-4 grid gap-y-1 text-xs text-slate-300 sm:grid-cols-[1fr_auto] sm:gap-y-2">
-            <span>Uptime</span>
-            <span className="text-right font-semibold text-slate-100">
-              {summary.uptime}
-            </span>
-
-            <span>Attack penalties</span>
-            <span className="text-right font-semibold text-riskHigh">
-              {summary.attackPenalties}
-            </span>
-
-            <span>Report bonus</span>
-            <span className="text-right font-semibold text-emerald-400">
-              {summary.reportBonus}
-            </span>
-
-            <div className="mt-2 border-t border-slate-800 sm:col-span-2" />
-
-            <span className="mt-2 text-sm font-semibold text-slate-100">
-              Total
-            </span>
-            <span className="mt-2 text-right text-lg font-bold text-slate-50">
-              {total}
-            </span>
+        {!loading && summary && (
+          <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-4 text-sm">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-1 text-xs text-slate-300">
+                <div className="flex items-center justify-between gap-4">
+                  <span>Uptime</span>
+                  <span className="font-mono text-slate-50">
+                    {summary.uptime}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span>Attack penalties</span>
+                  <span className="font-mono text-rose-400">
+                    {summary.penalties}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span>Report bonus</span>
+                  <span className="font-mono text-emerald-400">
+                    {summary.reportBonus}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 md:mt-0">
+                <p className="text-xs text-slate-400">Total score</p>
+                <p className="text-3xl font-semibold text-slate-50">
+                  {summary.total}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </section>
 
-      {/* Event log - visible to both, but instructors get extra context */}
+      {/* Score events */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-100">Score events</h2>
         <p className="mt-1 text-xs text-slate-400">
-          Each row represents a change to the score - either automatic from
-          scripts or manual from instructor decisions.
+          Each row represents a change to the score - either automatic (from
+          scripts) or manual (from instructor decisions).
         </p>
-        {isInstructor && (
-          <p className="mt-1 text-[11px] text-slate-400">
-            Instructor note: this table should match the official log that
-            explains why points changed so that students can review after the
-            exercise.
-          </p>
+
+        {loading && (
+          <p className="mt-3 text-xs text-slate-400">Loading events…</p>
         )}
 
-        <div className="mt-3 overflow-hidden rounded-xl border border-slate-800">
-          <table className="min-w-full text-xs">
-            <thead className="bg-slate-950/60 text-slate-400">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">Time</th>
-                <th className="px-3 py-2 text-left font-medium">Team</th>
-                <th className="px-3 py-2 text-left font-medium">Change</th>
-                <th className="px-3 py-2 text-left font-medium">Category</th>
-                <th className="px-3 py-2 text-left font-medium">Reason</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 bg-slate-900/60">
-              {events.map((e, idx) => (
-                <tr key={idx}>
-                  <td className="px-3 py-2 text-slate-300">{e.time}</td>
-                  <td className="px-3 py-2 text-slate-300">
-                    {teamLabel(e.team)}
-                  </td>
-                  <td
-                    className={`px-3 py-2 font-semibold ${pointsClass(
-                      e.points
-                    )}`}
-                  >
-                    {e.points > 0 ? `+${e.points}` : e.points}
-                  </td>
-                  <td className="px-3 py-2 text-slate-300">
-                    {e.category === "auto" ? "Automatic" : "Manual"}
-                  </td>
-                  <td className="px-3 py-2 text-slate-300">{e.note}</td>
-                </tr>
-              ))}
-
-              {events.length === 0 && (
+        {!loading && (
+          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70">
+            <table className="min-w-full text-left text-xs text-slate-200">
+              <thead className="bg-slate-900/80 text-[11px] uppercase tracking-wide text-slate-400">
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="px-3 py-4 text-center text-xs text-slate-500"
-                  >
-                    No events loaded yet.
-                  </td>
+                  <th className="px-4 py-2">Time</th>
+                  <th className="px-4 py-2">Team</th>
+                  <th className="px-4 py-2">Change</th>
+                  <th className="px-4 py-2">Category</th>
+                  <th className="px-4 py-2">Reason</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {events.map((e, idx) => (
+                  <tr
+                    key={idx}
+                    className={
+                      idx % 2 === 0 ? "bg-slate-950/80" : "bg-slate-900/80"
+                    }
+                  >
+                    <td className="px-4 py-2 font-mono text-[11px] text-slate-400">
+                      {e.time}
+                    </td>
+                    <td className="px-4 py-2">{e.team}</td>
+                    <td
+                      className={`px-4 py-2 font-mono ${deltaClass(e.delta)}`}
+                    >
+                      {e.delta > 0 ? `+${e.delta}` : e.delta}
+                    </td>
+                    <td className="px-4 py-2">{e.category}</td>
+                    <td className="px-4 py-2 text-slate-300">{e.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
-
-      {/* Instructor-only future controls */}
-      {isInstructor && <InstructorTools section="Scores" />}
     </div>
   );
 }

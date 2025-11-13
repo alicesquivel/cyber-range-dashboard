@@ -41,17 +41,18 @@ function App() {
 
         <div className="mt-6">
           {activeTab === "Overview" && <OverviewTab viewMode={viewMode} />}
+
           {activeTab === "Network & Nodes" && (
             <NetworkTab viewMode={viewMode} />
           )}
+
           {activeTab === "Scores & Events" && <ScoresTab viewMode={viewMode} />}
+
           {activeTab === "Challenges / CTF" && (
             <ChallengesTab viewMode={viewMode} />
           )}
+
           {activeTab === "Docs" && <DocsTab viewMode={viewMode} />}
-          {activeTab === "Challenges / CTF" && (
-            <ChallengesTab viewMode={viewMode} />
-          )}
         </div>
       </main>
     </div>
