@@ -249,10 +249,12 @@ export default function ChallengesTab({ viewMode }) {
             <React.Fragment key={ch.id}>
               <article className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  {/* LEFT SIDE: compact info */}
                   <div className="space-y-1">
                     <h3 className="text-sm font-semibold text-slate-100">
                       {ch.title}
                     </h3>
+
                     <p className="text-[11px] text-slate-400">
                       ID:{" "}
                       <span className="font-mono lowercase text-slate-300">
@@ -260,6 +262,7 @@ export default function ChallengesTab({ viewMode }) {
                       </span>{" "}
                       • {ch.category} • {ch.difficulty} • {ch.points} pts
                     </p>
+
                     {pack && (
                       <p className="text-[11px] text-slate-400">
                         Pack:{" "}
@@ -269,20 +272,15 @@ export default function ChallengesTab({ viewMode }) {
                       </p>
                     )}
 
-                    {/* main summary */}
-                    <p className="mt-1 text-xs text-slate-300">{ch.summary}</p>
-
-                    {/* surface the student hint so it isn't hidden */}
-                    {ch.studentHint && (
-                      <p className="mt-2 text-[11px] text-slate-400">
-                        <span className="font-semibold text-slate-300">
-                          Hint for students:
-                        </span>{" "}
-                        {ch.studentHint}
+                    {/* short summary only */}
+                    {ch.summary && (
+                      <p className="mt-1 text-xs text-slate-300">
+                        {ch.summary}
                       </p>
                     )}
                   </div>
 
+                  {/* RIGHT SIDE: status + buttons */}
                   <div className="flex flex-col items-start gap-2 text-xs sm:items-end">
                     <span
                       className={
@@ -299,7 +297,9 @@ export default function ChallengesTab({ viewMode }) {
 
                     <button
                       type="button"
-                      onClick={() => setActiveChallengeId(ch.id)}
+                      onClick={() =>
+                        setActiveChallengeId(isActive ? null : ch.id)
+                      }
                       className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-900 hover:bg-slate-200"
                     >
                       {isActive ? "Hide details" : "View full details"}
