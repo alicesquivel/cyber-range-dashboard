@@ -6,6 +6,7 @@ import NetworkTab from "./components/network/NetworkTab.jsx";
 import ScoresTab from "./components/scores/ScoresTab.jsx";
 import ChallengesTab from "./components/challenges/ChallengesTab.jsx";
 import DocsTab from "./components/docs/DocsTab.jsx";
+
 // import ChallengesTab from "./components/challenges/ChallengesTab.jsx";
 
 function App() {
@@ -23,8 +24,7 @@ function App() {
               Cyber Range Dashboard
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Overview of Raspberry Pi nodes, scores, lab activity, and
-              challenges.
+              {TAB_SUBTITLES[activeTab] ?? TAB_SUBTITLES["Overview"]}
             </p>
           </div>
           <p className="text-[11px] text-slate-500">
@@ -58,5 +58,14 @@ function App() {
     </div>
   );
 }
+const TAB_SUBTITLES = {
+  Overview:
+    "Overview of Raspberry Pi nodes, scores, lab activity, and challenges.",
+  "Network & Nodes": "Network topology, VLANs, and Raspberry Pi node roles.",
+  "Scores & Events": "Score breakdown, uptime, penalties, and recent events.",
+  "Challenges / CTF":
+    "Challenge tasks, flags, and CTF-style missions for this range.",
+  Docs: "Documentation, lab handouts, and instructor notes for the Cyber Range.",
+};
 
 export default App;

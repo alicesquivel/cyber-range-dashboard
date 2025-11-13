@@ -9,13 +9,33 @@ import {
 export default function DocsTab({ viewMode }) {
   const isInstructor = viewMode === "instructor";
 
+  const studentDocs = STUDENT_DOCS;
+  const instructorDocs = INSTRUCTOR_DOCS;
+
   return (
     <div className="space-y-4">
-      {/* START HERE SECTION */}
+      {/* Intro banner */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-xs text-slate-300">
+        {isInstructor ? (
+          <p>
+            Documentation hub for the Cyber Range. Use this page to share
+            student-facing handouts and keep instructor-only reference material
+            in one place. Links point to files under the public/docs/ folder.
+          </p>
+        ) : (
+          <p>
+            Start here to understand what this Cyber Range is, how to read the
+            dashboard, and where to find the handouts you need for each lab.
+          </p>
+        )}
+      </div>
+
+      {/* Start here section */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-100">Start here</h2>
         <p className="mt-1 text-xs text-slate-400">
-          Overview of the range and how this dashboard fits into your labs.
+          A quick overview of the range and how the dashboard fits into your
+          labs.
         </p>
 
         <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -25,19 +45,23 @@ export default function DocsTab({ viewMode }) {
         </div>
       </section>
 
-      {/* STUDENT + INSTRUCTOR PANELS */}
+      {/* Student / Instructor sections */}
       <section className="grid gap-4 md:grid-cols-2">
-        {/* Student docs */}
+        {/* Student section – always visible */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-100">
-            Student resources
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-100">
+              Student resources
+            </h3>
+            <p className="text-[11px] text-slate-400">Visible to everyone</p>
+          </div>
           <p className="mt-1 text-xs text-slate-400">
-            Lab handouts, quickstart guides, and reference documents.
+            Use these documents during lab to understand the objectives, login
+            steps, and expected deliverables.
           </p>
 
           <div className="mt-3 space-y-3">
-            {STUDENT_DOCS.map((doc) => (
+            {studentDocs.map((doc) => (
               <DocCard
                 key={doc.id}
                 title={doc.title}
@@ -48,19 +72,26 @@ export default function DocsTab({ viewMode }) {
           </div>
         </div>
 
-        {/* Instructor docs */}
+        {/* Instructor section – only in instructor view */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-100">
-            Instructor resources
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-100">
+              Instructor resources
+            </h3>
+            <p className="text-[11px] text-slate-400">
+              {isInstructor
+                ? "Visible in instructor view"
+                : "Sign in as instructor to view"}
+            </p>
+          </div>
           <p className="mt-1 text-xs text-slate-400">
-            Internal notes for course staff. Students will not normally see
-            these documents.
+            Internal notes for course staff: network layout, range reset
+            procedures, and operational playbooks.
           </p>
 
           {isInstructor ? (
             <div className="mt-3 space-y-3">
-              {INSTRUCTOR_DOCS.map((doc) => (
+              {instructorDocs.map((doc) => (
                 <DocCard
                   key={doc.id}
                   title={doc.title}
@@ -71,7 +102,8 @@ export default function DocsTab({ viewMode }) {
             </div>
           ) : (
             <p className="mt-3 text-[11px] text-slate-500">
-              Switch to Instructor view to see internal range documentation.
+              This section is reserved for instructors. In class, your
+              instructor may share selected diagrams or notes from this column.
             </p>
           )}
         </div>
