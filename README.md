@@ -59,14 +59,8 @@ Instructor-only panel providing:
 
 This project uses **React + Vite**.
 
-## Install dependencies
+## Install dependenciess
 
 ```bash
 npm install
-```
-
-## Start the development server
-
-```bash
-npm run dev
 ```
