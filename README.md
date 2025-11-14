@@ -1,16 +1,63 @@
-# React + Vite
+# Cyber Range Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Raspberry Pi cyber range dashboard for teaching networking, security, digital forensics, and CTF-style investigations.
 
-Currently, two official plugins are available:
+This project provides the front-end interface for the Cyber Range in a Box. It is designed for both classroom instruction and self-guided labs. The dashboard includes node health monitoring, scoring, challenge management, downloadable artifacts, and instructor-only documentation.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Overview
 
-## Expanding the ESLint configuration
+Displays high-level status of all Raspberry Pi nodes, including:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Node health
+- Basic metrics (mock data during development)
+- Quick summary of the range
+
+### Network & Nodes
+
+Shows detailed information about every Pi:
+
+- IP, VLAN, and role
+- Status (up, degraded, down)
+- Side-panel node details (automatic polling)
+
+### Scores & Events
+
+Provides a visual record of:
+
+- Team scores
+- Automatic scoring events
+- Instructor-assigned bonuses or penalties
+
+### Challenges / CTF
+
+Mission-pack structured challenges with:
+
+- Difficulty, category, and point values
+- Student hints
+- Instructor notes
+- Downloadable artifacts (PCAP, logs, PDFs)
+- Local solved tracking stored in the browser
+- Expandable inline detail drawer below each challenge
+
+Mission packs include:
+
+- Onboarding & Connectivity
+- Web Security & DMZ
+- Logging & Forensics
+- Main CTF Flags
+
+### Docs
+
+Central location for:
+
+- Student quickstart PDFs
+- Dashboard usage instructions
+- Instructor-only operational notes
+
+---
+
+## Project Structure
