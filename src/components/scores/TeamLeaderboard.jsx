@@ -1,5 +1,6 @@
 // src/components/scores/TeamLeaderboard.jsx
 import React, { useEffect, useState } from "react";
+import Skeleton from "../ui/Skeleton.jsx";
 import { fetchScores } from "../../api/scoreboard.js";
 import { TEAM_CONFIG } from "../../content/dashboardContent.js";
 
@@ -62,9 +63,17 @@ export default function TeamLeaderboard({ viewMode }) {
               className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-3"
               aria-hidden
             >
-              <div className="h-4 w-24 animate-pulse rounded bg-slate-700" />
-              <div className="mt-3 h-8 w-20 animate-pulse rounded bg-slate-800" />
-              <div className="mt-2 h-2 w-full animate-pulse rounded bg-slate-800" />
+              <Skeleton width="w-24" height="h-4" className="bg-slate-700" />
+              <div className="mt-3">
+                <Skeleton width="w-20" height="h-8" className="bg-slate-800" />
+              </div>
+              <div className="mt-2">
+                <Skeleton
+                  width="w-full"
+                  height="h-2"
+                  className="bg-slate-800"
+                />
+              </div>
             </div>
           ))}
         </div>

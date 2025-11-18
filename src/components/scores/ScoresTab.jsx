@@ -1,5 +1,6 @@
 // src/components/scores/ScoresTab.jsx
 import React, { useEffect, useState, useMemo } from "react";
+import Skeleton from "../ui/Skeleton.jsx";
 import { fetchScoreSummary, fetchScoreEvents } from "../../api/scoreboard.js";
 import TeamLeaderboard from "./TeamLeaderboard.jsx";
 
@@ -79,8 +80,8 @@ export default function ScoresTab({ viewMode }) {
 
         {loading && (
           <div className="mt-3 space-y-2">
-            <div className="h-4 w-48 animate-pulse rounded bg-slate-700" />
-            <div className="h-6 w-32 animate-pulse rounded bg-slate-800" />
+            <Skeleton width="w-48" height="h-4" className="bg-slate-700" />
+            <Skeleton width="w-32" height="h-6" className="bg-slate-800" />
           </div>
         )}
 
@@ -130,9 +131,9 @@ export default function ScoresTab({ viewMode }) {
           <div className="mt-3 space-y-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-4">
-                <div className="h-3 w-24 animate-pulse rounded bg-slate-700" />
-                <div className="h-3 w-32 animate-pulse rounded bg-slate-800" />
-                <div className="h-3 w-12 animate-pulse rounded bg-slate-700" />
+                <Skeleton width="w-24" height="h-3" className="bg-slate-700" />
+                <Skeleton width="w-32" height="h-3" className="bg-slate-800" />
+                <Skeleton width="w-12" height="h-3" className="bg-slate-700" />
               </div>
             ))}
           </div>

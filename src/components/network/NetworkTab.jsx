@@ -6,6 +6,7 @@ import { getNodeDetails } from "../../content/networkNodes.js";
 import InstructorTools from "../instructor/InstructorTools.jsx";
 import SectionHeader from "../layout/SectionHeader";
 import StatusBadge from "../ui/StatusBadge.jsx";
+import Skeleton from "../ui/Skeleton.jsx";
 
 const NODE_DETAILS = {
   "10.0.0.1": {
@@ -176,21 +177,53 @@ export default function NetworkTab({ viewMode }) {
                   {[1, 2, 3].map((i) => (
                     <tr key={`skeleton-${i}`}>
                       <td className="px-3 py-3">
-                        <div className="h-3 w-32 animate-pulse rounded bg-slate-700" />
-                        <div className="mt-2 h-2 w-20 animate-pulse rounded bg-slate-800" />
+                        <Skeleton
+                          width="w-32"
+                          height="h-3"
+                          className="bg-slate-700"
+                        />
+                        <div className="mt-2">
+                          <Skeleton
+                            width="w-20"
+                            height="h-2"
+                            className="bg-slate-800"
+                          />
+                        </div>
                       </td>
                       <td className="px-3 py-3">
-                        <div className="h-3 w-24 animate-pulse rounded bg-slate-700" />
-                        <div className="mt-2 h-2 w-12 animate-pulse rounded bg-slate-800" />
+                        <Skeleton
+                          width="w-24"
+                          height="h-3"
+                          className="bg-slate-700"
+                        />
+                        <div className="mt-2">
+                          <Skeleton
+                            width="w-12"
+                            height="h-2"
+                            className="bg-slate-800"
+                          />
+                        </div>
                       </td>
                       <td className="px-3 py-3">
-                        <div className="h-3 w-16 animate-pulse rounded bg-slate-700" />
+                        <Skeleton
+                          width="w-16"
+                          height="h-3"
+                          className="bg-slate-700"
+                        />
                       </td>
                       <td className="px-3 py-3">
-                        <div className="h-3 w-20 animate-pulse rounded bg-slate-700" />
+                        <Skeleton
+                          width="w-20"
+                          height="h-3"
+                          className="bg-slate-700"
+                        />
                       </td>
                       <td className="px-3 py-3">
-                        <div className="h-3 w-12 animate-pulse rounded bg-slate-700" />
+                        <Skeleton
+                          width="w-12"
+                          height="h-3"
+                          className="bg-slate-700"
+                        />
                       </td>
                     </tr>
                   ))}
