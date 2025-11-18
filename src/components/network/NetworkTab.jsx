@@ -7,6 +7,7 @@ import InstructorTools from "../instructor/InstructorTools.jsx";
 import SectionHeader from "../layout/SectionHeader";
 import StatusBadge from "../ui/StatusBadge.jsx";
 import Skeleton from "../ui/Skeleton.jsx";
+import IconChevron from "../ui/IconChevron.jsx";
 
 const NODE_DETAILS = {
   "10.0.0.1": {
@@ -166,8 +167,12 @@ export default function NetworkTab({ viewMode }) {
                       {details.services || "-"}
                     </td>
                     <td className="px-3 py-2">
-                      <StatusBadge status={status} />
-                      <span className="ml-2 text-slate-400">›</span>
+                      <div className="flex items-center">
+                        <StatusBadge status={status} />
+                        <span className="ml-2 text-slate-400">
+                          <IconChevron />
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 );

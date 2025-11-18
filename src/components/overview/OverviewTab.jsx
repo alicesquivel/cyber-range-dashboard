@@ -1,6 +1,7 @@
 // src/components/Overview/Overview.jsx (or OverviewTab.jsx)
 import React from "react";
 import SectionHeader from "../layout/SectionHeader";
+import Card from "../ui/Card.jsx";
 
 function OverviewTab({ viewMode }) {
   const isInstructor = viewMode === "instructor";
@@ -57,9 +58,10 @@ function OverviewTab({ viewMode }) {
 
         <div className="mt-3 grid gap-4 md:grid-cols-4">
           {nodes.map((node) => (
-            <div
+            <Card
+              as="div"
               key={node.name}
-              className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 transition hover:border-slate-700 hover:bg-slate-900"
+              className="flex flex-col justify-between bg-slate-900/80 px-4 py-3 transition hover:border-slate-700 hover:bg-slate-900"
               tabIndex={0}
               role="group"
               aria-label={`${node.name} ${node.ip} ${node.vlan} status ${node.status}`}
@@ -90,7 +92,7 @@ function OverviewTab({ viewMode }) {
                     : "Unknown"}
                 </span>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       </section>

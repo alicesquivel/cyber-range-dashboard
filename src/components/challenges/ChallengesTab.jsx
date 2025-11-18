@@ -1,6 +1,7 @@
 // src/components/challenges/ChallengesTab.jsx
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import StatusBadge from "../ui/StatusBadge.jsx";
+import Card from "../ui/Card.jsx";
 import { CHALLENGES, PACKS } from "./challengesContent.js";
 import ChallengeDetailDrawer from "./ChallengeDetailDrawer.jsx";
 
@@ -373,7 +374,7 @@ export default function ChallengesTab({ viewMode }) {
 
           return (
             <React.Fragment key={ch.id}>
-              <article className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+              <Card as="article" className="bg-slate-900/70">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   {/* left side */}
                   <div
@@ -527,7 +528,7 @@ export default function ChallengesTab({ viewMode }) {
                     )}
                   </div>
                 </div>
-              </article>
+              </Card>
 
               {/* inline drawer */}
               <ChallengeDetailDrawer

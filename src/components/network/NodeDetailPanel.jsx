@@ -1,13 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { getNodeDetails } from "../../content/networkNodes.js";
 import StatusBadge from "../ui/StatusBadge.jsx";
-
-const statusBadgeClass = (status) => {
-  if (status === "up") return "bg-emerald-500/10 text-emerald-400";
-  if (status === "degraded") return "bg-amber-500/10 text-amber-400";
-  if (status === "down") return "bg-rose-500/10 text-rose-400";
-  return "bg-slate-700 text-slate-300";
-};
+import Card from "../ui/Card.jsx";
 
 // Dummy metrics fallback for now.
 // TODO(Jake): once real metrics are wired in, you can remove or simplify this.
@@ -76,17 +70,13 @@ export default function NodeDetailPanel({
   }, [node]);
   if (!node) {
     return (
-      <section
-        className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm"
-        tabIndex={-1}
-        ref={panelRef}
-      >
+      <Card as="section" tabIndex={-1} ref={panelRef}>
         <h2 className="text-sm font-semibold text-slate-100">Node details</h2>
         <p className="mt-1 text-xs text-slate-400">
           Select a node in the table or network map to see more information
           about its role in the range.
         </p>
-      </section>
+      </Card>
     );
   }
 
@@ -95,11 +85,7 @@ export default function NodeDetailPanel({
   const effectiveMetrics = metrics || getDummyMetrics(meta, status);
 
   return (
-    <section
-      className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm"
-      tabIndex={-1}
-      ref={panelRef}
-    >
+    <Card as="section" tabIndex={-1} ref={panelRef}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-sm font-semibold text-slate-100">
@@ -210,6 +196,6 @@ export default function NodeDetailPanel({
           </p>
         </div>
       )}
-    </section>
+    </Card>
   );
 }

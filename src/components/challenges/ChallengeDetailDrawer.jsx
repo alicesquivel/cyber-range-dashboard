@@ -1,6 +1,7 @@
 // src/components/challenges/ChallengeDetailDrawer.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { PACKS } from "./challengesContent.js";
+import Card from "../ui/Card.jsx";
 
 export default function ChallengeDetailDrawer({
   challenge,
@@ -80,7 +81,7 @@ export default function ChallengeDetailDrawer({
           : "mt-0 max-h-0 opacity-0 -translate-y-2 pointer-events-none")
       }
     >
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4 shadow-sm">
+      <Card as="div" className="bg-slate-950/80 p-4">
         {/* Header row */}
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -275,7 +276,7 @@ export default function ChallengeDetailDrawer({
             )}
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
