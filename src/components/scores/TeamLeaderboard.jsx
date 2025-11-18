@@ -6,6 +6,7 @@ import { TEAM_CONFIG } from "../../content/dashboardContent.js";
 export default function TeamLeaderboard({ viewMode }) {
   const [scores, setScores] = useState({});
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -15,6 +16,7 @@ export default function TeamLeaderboard({ viewMode }) {
       try {
         const data = await fetchScores();
         if (!cancelled) setScores(data || {});
+        if (!cancelled) setLastUpdated(new Date().toISOString());
       } catch (err) {
         console.warn("TeamLeaderboard error:", err);
       } finally {
@@ -53,7 +55,19 @@ export default function TeamLeaderboard({ viewMode }) {
       </div>
 
       {loading && (
-        <p className="mt-3 text-xs text-slate-400">Loading scores…</p>
+        <div className="mt-3 grid gap-3 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-3"
+              aria-hidden
+            >
+              <div className="h-4 w-24 animate-pulse rounded bg-slate-700" />
+              <div className="mt-3 h-8 w-20 animate-pulse rounded bg-slate-800" />
+              <div className="mt-2 h-2 w-full animate-pulse rounded bg-slate-800" />
+            </div>
+          ))}
+        </div>
       )}
 
       {!loading && entries.length === 0 && (
@@ -83,6 +97,9 @@ export default function TeamLeaderboard({ viewMode }) {
               <div
                 key={key}
                 className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-3"
+                tabIndex={0}
+                role="group"
+                aria-label={`${cfg.label} ${pts} points`}
               >
                 <div className="flex items-center justify-between">
                   <h3 className={`text-sm font-semibold ${cfg.colorClass}`}>

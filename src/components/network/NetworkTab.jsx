@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { fetchNetworkFromScoreboard } from "../../api/scoreboard.js";
 import { fetchHealth } from "../../api/telemetry.js";
 import NodeDetailPanel from "./NodeDetailPanel.jsx";
@@ -40,6 +40,7 @@ export default function NetworkTab({ viewMode }) {
   const [network, setNetwork] = useState([]);
   const [health, setHealth] = useState([]);
   const [selectedIp, setSelectedIp] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +55,7 @@ export default function NetworkTab({ viewMode }) {
         if (!cancelled) {
           setNetwork(networkData);
           setHealth(healthData);
+          setLastUpdated(new Date().toISOString());
         }
       } catch (err) {
         console.warn("NetworkTab polling error:", err);
@@ -70,8 +72,14 @@ export default function NetworkTab({ viewMode }) {
     };
   }, []);
 
-  const healthByIp = Object.fromEntries(health.map((h) => [h.ip, h.status]));
+  const healthByIp = useMemo(
+    () => Object.fromEntries(health.map((h) => [h.ip, h.status])),
+    [health]
+  );
   const isInstructor = viewMode === "instructor";
+  const handleClose = useCallback(() => setSelectedIp(null), []);
+
+  const isLoading = network.length === 0;
 
   return (
     <div className="space-y-4">
@@ -86,7 +94,30 @@ export default function NetworkTab({ viewMode }) {
               health.json and network.json exports.
             </p>
           </div>
-          <p className="text-[11px] text-slate-400">Subnet 10.0.0.0/24</p>
+          <div className="flex items-center gap-3">
+            <p className="text-[11px] text-slate-400">Subnet 10.0.0.0/24</p>
+            <div className="text-[11px] text-slate-500">
+              {lastUpdated
+                ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}`
+                : null}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                // manual refresh
+                try {
+                  fetchNetworkFromScoreboard().then((d) => setNetwork(d));
+                  fetchHealth().then((h) => setHealth(h));
+                  setLastUpdated(new Date().toISOString());
+                } catch (e) {
+                  console.warn(e);
+                }
+              }}
+              className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
 
         <div className="mt-3 overflow-hidden rounded-xl border border-slate-800">
@@ -109,7 +140,15 @@ export default function NetworkTab({ viewMode }) {
                   <tr
                     key={node.ip}
                     className="cursor-pointer hover:bg-slate-800/70"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Open details for ${node.name} ${node.ip}`}
                     onClick={() => setSelectedIp(node.ip)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setSelectedIp(node.ip);
+                      }
+                    }}
                   >
                     <td className="px-3 py-2 text-slate-100">
                       <div className="text-xs font-semibold">{node.name}</div>
@@ -146,20 +185,35 @@ export default function NetworkTab({ viewMode }) {
                           ? "Down"
                           : "Unknown"}
                       </span>
+                      <span className="ml-2 text-slate-400">›</span>
                     </td>
                   </tr>
                 );
               })}
-
-              {network.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-3 py-4 text-center text-xs text-slate-500"
-                  >
-                    Loading node list…
-                  </td>
-                </tr>
+              {isLoading && (
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <tr key={`skeleton-${i}`}>
+                      <td className="px-3 py-3">
+                        <div className="h-3 w-32 animate-pulse rounded bg-slate-700" />
+                        <div className="mt-2 h-2 w-20 animate-pulse rounded bg-slate-800" />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="h-3 w-24 animate-pulse rounded bg-slate-700" />
+                        <div className="mt-2 h-2 w-12 animate-pulse rounded bg-slate-800" />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="h-3 w-16 animate-pulse rounded bg-slate-700" />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="h-3 w-20 animate-pulse rounded bg-slate-700" />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="h-3 w-12 animate-pulse rounded bg-slate-700" />
+                      </td>
+                    </tr>
+                  ))}
+                </>
               )}
             </tbody>
           </table>
@@ -177,7 +231,7 @@ export default function NetworkTab({ viewMode }) {
             : "unknown"
         }
         viewMode={viewMode}
-        onClose={() => setSelectedIp(null)}
+        onClose={handleClose}
       />
 
       {/* Instructor-only placeholder for future tools */}

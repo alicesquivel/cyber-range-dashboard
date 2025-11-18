@@ -82,7 +82,12 @@ export default function DocsTab({ viewMode }) {
 
 function DocCard({ title, body, links = [] }) {
   return (
-    <article className="rounded-xl border border-slate-800 bg-slate-950/80 p-3">
+    <article
+      className="rounded-xl border border-slate-800 bg-slate-950/80 p-3"
+      tabIndex={0}
+      role="article"
+      aria-label={title}
+    >
       <h4 className="text-xs font-semibold text-slate-100">{title}</h4>
       <p className="mt-1 text-[11px] text-slate-300">{body}</p>
 

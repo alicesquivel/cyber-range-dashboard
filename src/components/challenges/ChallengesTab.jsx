@@ -1,5 +1,5 @@
 // src/components/challenges/ChallengesTab.jsx
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { CHALLENGES, PACKS } from "./challengesContent.js";
 import ChallengeDetailDrawer from "./ChallengeDetailDrawer.jsx";
 
@@ -375,7 +375,19 @@ export default function ChallengesTab({ viewMode }) {
               <article className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   {/* left side */}
-                  <div className="space-y-1">
+                  <div
+                    className="space-y-1"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Open challenge details for ${ch.title} ${ch.id}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setActiveChallengeId((prev) =>
+                          prev === ch.id ? null : ch.id
+                        );
+                      }
+                    }}
+                  >
                     <h3 className="text-sm font-semibold text-slate-100">
                       {ch.title}
                     </h3>

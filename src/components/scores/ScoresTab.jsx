@@ -1,5 +1,5 @@
 // src/components/scores/ScoresTab.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { fetchScoreSummary, fetchScoreEvents } from "../../api/scoreboard.js";
 import TeamLeaderboard from "./TeamLeaderboard.jsx";
 
@@ -13,6 +13,7 @@ export default function ScoresTab({ viewMode }) {
   const [summary, setSummary] = useState(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const isInstructor = viewMode === "instructor";
 
@@ -29,6 +30,7 @@ export default function ScoresTab({ viewMode }) {
         if (!cancelled) {
           setSummary(s);
           setEvents(e || []);
+          setLastUpdated(new Date().toISOString());
         }
       } catch (err) {
         console.warn("ScoresTab error:", err);
@@ -76,7 +78,10 @@ export default function ScoresTab({ viewMode }) {
         </p>
 
         {loading && (
-          <p className="mt-3 text-xs text-slate-400">Loading score summary…</p>
+          <div className="mt-3 space-y-2">
+            <div className="h-4 w-48 animate-pulse rounded bg-slate-700" />
+            <div className="h-6 w-32 animate-pulse rounded bg-slate-800" />
+          </div>
         )}
 
         {!loading && summary && (
@@ -122,7 +127,15 @@ export default function ScoresTab({ viewMode }) {
         </p>
 
         {loading && (
-          <p className="mt-3 text-xs text-slate-400">Loading events…</p>
+          <div className="mt-3 space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="h-3 w-24 animate-pulse rounded bg-slate-700" />
+                <div className="h-3 w-32 animate-pulse rounded bg-slate-800" />
+                <div className="h-3 w-12 animate-pulse rounded bg-slate-700" />
+              </div>
+            ))}
+          </div>
         )}
 
         {!loading && (
@@ -141,9 +154,17 @@ export default function ScoresTab({ viewMode }) {
                 {events.map((e, idx) => (
                   <tr
                     key={idx}
+                    tabIndex={0}
+                    role="row"
+                    aria-label={`${e.time} ${e.team} change ${e.delta}`}
                     className={
                       idx % 2 === 0 ? "bg-slate-950/80" : "bg-slate-900/80"
                     }
+                    onKeyDown={(ev) => {
+                      if (ev.key === "Enter") {
+                        /* noop for now; could open detail */
+                      }
+                    }}
                   >
                     <td className="px-4 py-2 font-mono text-[11px] text-slate-400">
                       {e.time}

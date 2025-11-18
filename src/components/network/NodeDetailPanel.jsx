@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { getNodeDetails } from "../../content/networkNodes.js";
 
 const statusBadgeClass = (status) => {
@@ -65,9 +65,21 @@ export default function NodeDetailPanel({
   viewMode,
   onClose,
 }) {
+  const panelRef = useRef(null);
+
+  useEffect(() => {
+    if (node) {
+      // move focus into the panel for keyboard / screen reader users
+      panelRef.current?.focus();
+    }
+  }, [node]);
   if (!node) {
     return (
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
+      <section
+        className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm"
+        tabIndex={-1}
+        ref={panelRef}
+      >
         <h2 className="text-sm font-semibold text-slate-100">Node details</h2>
         <p className="mt-1 text-xs text-slate-400">
           Select a node in the table or network map to see more information
@@ -82,7 +94,11 @@ export default function NodeDetailPanel({
   const effectiveMetrics = metrics || getDummyMetrics(meta, status);
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
+    <section
+      className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm"
+      tabIndex={-1}
+      ref={panelRef}
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-sm font-semibold text-slate-100">

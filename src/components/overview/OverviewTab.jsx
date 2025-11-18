@@ -60,6 +60,14 @@ function OverviewTab({ viewMode }) {
             <div
               key={node.name}
               className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 transition hover:border-slate-700 hover:bg-slate-900"
+              tabIndex={0}
+              role="group"
+              aria-label={`${node.name} ${node.ip} ${node.vlan} status ${node.status}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  // reserved: could open node details
+                }
+              }}
             >
               <div>
                 <h3 className="text-sm font-semibold text-slate-100">
