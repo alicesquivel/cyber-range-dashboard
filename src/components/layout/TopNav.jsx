@@ -1,50 +1,61 @@
+// src/components/layout/TopNav.jsx
 import React from "react";
+
+const VIEW_OPTIONS = [
+  { id: "student", label: "Student" },
+  { id: "instructor", label: "Instructor" },
+];
 
 export default function TopNav({ viewMode, onChangeViewMode }) {
   return (
-    <header className="w-full border-b border-slate-800 bg-surface/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        {/* Left: logo + product name */}
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary text-xl font-bold">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-sky-500/10 text-sm font-semibold text-sky-300">
             CR
           </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-200">
+          <div className="leading-tight">
+            <div className="text-sm font-semibold text-slate-50">
               Cyber Range in a Box
-            </p>
-            <p className="text-xs text-slate-400">
+            </div>
+            <div className="text-xs text-slate-400">
               Raspberry Pi cyber range dashboard
-            </p>
+            </div>
           </div>
         </div>
 
-        {/* View switcher - Student vs Instructor */}
-        <div className="flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/60 p-1 text-[11px]">
-          {/* TODO(Max): style or relabel this toggle if you want different wording. */}
-          <button
-            type="button"
-            onClick={() => onChangeViewMode("student")}
-            className={
-              "rounded-full px-2 py-1 font-medium " +
-              (viewMode === "student"
-                ? "bg-slate-100 text-slate-900"
-                : "text-slate-300 hover:bg-slate-800")
-            }
+        {/* Right: view mode toggle */}
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            View as
+          </span>
+          <div
+            className="inline-flex rounded-full border border-slate-700 bg-slate-900/80 p-0.5 text-xs"
+            role="radiogroup"
+            aria-label="Select dashboard view"
           >
-            Student
-          </button>
-          <button
-            type="button"
-            onClick={() => onChangeViewMode("instructor")}
-            className={
-              "rounded-full px-2 py-1 font-medium " +
-              (viewMode === "instructor"
-                ? "bg-slate-100 text-slate-900"
-                : "text-slate-300 hover:bg-slate-800")
-            }
-          >
-            Instructor
-          </button>
+            {VIEW_OPTIONS.map((opt) => {
+              const isActive = viewMode === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isActive}
+                  onClick={() => onChangeViewMode(opt.id)}
+                  className={
+                    "rounded-full px-3.5 py-1 font-medium transition " +
+                    (isActive
+                      ? "bg-slate-50 text-slate-900 shadow-sm"
+                      : "text-slate-300 hover:bg-slate-800/70 hover:text-slate-50")
+                  }
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </header>
