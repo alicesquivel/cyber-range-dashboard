@@ -1,5 +1,6 @@
 // src/components/challenges/ChallengesTab.jsx
 import React, { useState, useMemo, useEffect, useCallback } from "react";
+import StatusBadge from "../ui/StatusBadge.jsx";
 import { CHALLENGES, PACKS } from "./challengesContent.js";
 import ChallengeDetailDrawer from "./ChallengeDetailDrawer.jsx";
 
@@ -421,14 +422,9 @@ export default function ChallengesTab({ viewMode }) {
                   {/* right side: status, solved, controls */}
                   <div className="flex flex-col items-start gap-2 text-xs sm:items-end">
                     {/* availability status */}
-                    <span
-                      className={
-                        "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
-                        statusInfo.className
-                      }
-                    >
+                    <StatusBadge status={effectiveStatus}>
                       {statusInfo.label}
-                    </span>
+                    </StatusBadge>
 
                     {/* solved status */}
                     <span

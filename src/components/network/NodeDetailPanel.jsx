@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { getNodeDetails } from "../../content/networkNodes.js";
+import StatusBadge from "../ui/StatusBadge.jsx";
 
 const statusBadgeClass = (status) => {
   if (status === "up") return "bg-emerald-500/10 text-emerald-400";
@@ -112,20 +113,7 @@ export default function NodeDetailPanel({
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <span
-            className={
-              "inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide " +
-              statusBadgeClass(status)
-            }
-          >
-            {status === "up"
-              ? "Online"
-              : status === "degraded"
-              ? "Degraded"
-              : status === "down"
-              ? "Down"
-              : "Unknown"}
-          </span>
+          <StatusBadge status={status} />
           {onClose && (
             <button
               type="button"

@@ -5,6 +5,7 @@ import NodeDetailPanel from "./NodeDetailPanel.jsx";
 import { getNodeDetails } from "../../content/networkNodes.js";
 import InstructorTools from "../instructor/InstructorTools.jsx";
 import SectionHeader from "../layout/SectionHeader";
+import StatusBadge from "../ui/StatusBadge.jsx";
 
 const NODE_DETAILS = {
   "10.0.0.1": {
@@ -27,13 +28,6 @@ const NODE_DETAILS = {
     role: "Client / Traffic Generator",
     services: "traffic scripts, attack tools",
   },
-};
-
-const statusBadgeClass = (status) => {
-  if (status === "up") return "bg-emerald-500/10 text-emerald-400";
-  if (status === "degraded") return "bg-amber-500/10 text-amber-400";
-  if (status === "down") return "bg-rose-500/10 text-rose-400";
-  return "bg-slate-700 text-slate-300";
 };
 
 export default function NetworkTab({ viewMode }) {
@@ -171,20 +165,7 @@ export default function NetworkTab({ viewMode }) {
                       {details.services || "-"}
                     </td>
                     <td className="px-3 py-2">
-                      <span
-                        className={
-                          "inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide " +
-                          statusBadgeClass(status)
-                        }
-                      >
-                        {status === "up"
-                          ? "Online"
-                          : status === "degraded"
-                          ? "Degraded"
-                          : status === "down"
-                          ? "Down"
-                          : "Unknown"}
-                      </span>
+                      <StatusBadge status={status} />
                       <span className="ml-2 text-slate-400">›</span>
                     </td>
                   </tr>
