@@ -1,0 +1,4 @@
+Task,Points,Evidence
+Lab 1 – All nodes ping successfully,10,Ping output + Dashboard screenshot
+Lab 2 – Firewall block verified,15,nftables rule + Failed ping
+Lab 3 – Incident report completed,5,Report MD file
