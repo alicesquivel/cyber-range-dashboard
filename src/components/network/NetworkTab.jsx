@@ -4,6 +4,7 @@ import { fetchHealth } from "../../api/telemetry.js";
 import NodeDetailPanel from "./NodeDetailPanel.jsx";
 import { getNodeDetails } from "../../content/networkNodes.js";
 import InstructorTools from "../instructor/InstructorTools.jsx";
+import SectionHeader from "../layout/SectionHeader";
 
 const NODE_DETAILS = {
   "10.0.0.1": {
