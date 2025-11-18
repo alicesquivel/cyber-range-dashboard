@@ -185,7 +185,7 @@ export default function NodeDetailPanel({
       )}
 
       {isInstructor && (
-        <div className="mt-3 rounded-xl border border-slate-700 bg-slate-950/60 p-3">
+        <Panel>
           <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
             Instructor notes
           </h3>
@@ -194,7 +194,7 @@ export default function NodeDetailPanel({
             quick checks, common misconfigurations, and how this node maps to
             the written lab steps.
           </p>
-        </div>
+        </Panel>
       )}
     </Card>
   );

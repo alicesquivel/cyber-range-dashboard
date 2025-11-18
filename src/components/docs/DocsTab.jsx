@@ -1,5 +1,6 @@
 // src/components/docs/DocsTab.jsx
 import React from "react";
+import Card from "../ui/Card.jsx";
 import {
   START_HERE,
   STUDENT_DOCS,
@@ -10,9 +11,9 @@ export default function DocsTab({ viewMode }) {
   const isInstructor = viewMode === "instructor";
 
   return (
-    <div className="space-y-4">
+    <Card className="space-y-4">
       {/* START HERE SECTION */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+      <Card as="section">
         <h2 className="text-sm font-semibold text-slate-100">Start here</h2>
         <p className="mt-1 text-xs text-slate-400">
           Overview of the range and how this dashboard fits into your labs.
@@ -23,12 +24,12 @@ export default function DocsTab({ viewMode }) {
             <DocCard key={item.id} title={item.title} body={item.body} />
           ))}
         </div>
-      </section>
+      </Card>
 
       {/* STUDENT + INSTRUCTOR PANELS */}
       <section className="grid gap-4 md:grid-cols-2">
         {/* Student docs */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+        <Card className="p-4">
           <h3 className="text-sm font-semibold text-slate-100">
             Student resources
           </h3>
@@ -46,10 +47,10 @@ export default function DocsTab({ viewMode }) {
               />
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Instructor docs */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+        <Card className="p-4">
           <h3 className="text-sm font-semibold text-slate-100">
             Instructor resources
           </h3>
@@ -74,16 +75,17 @@ export default function DocsTab({ viewMode }) {
               Switch to Instructor view to see internal range documentation.
             </p>
           )}
-        </div>
+        </Card>
       </section>
-    </div>
+    </Card>
   );
 }
 
 function DocCard({ title, body, links = [] }) {
   return (
-    <article
-      className="rounded-xl border border-slate-800 bg-slate-950/80 p-3"
+    <Card
+      as="article"
+      className="rounded-xl p-3"
       tabIndex={0}
       role="article"
       aria-label={title}
@@ -104,6 +106,6 @@ function DocCard({ title, body, links = [] }) {
           ))}
         </div>
       )}
-    </article>
+    </Card>
   );
 }

@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import StatusBadge from "../ui/StatusBadge.jsx";
 import Card from "../ui/Card.jsx";
+import Panel from "../ui/Panel.jsx";
 import { CHALLENGES, PACKS } from "./challengesContent.js";
 import ChallengeDetailDrawer from "./ChallengeDetailDrawer.jsx";
 
@@ -291,11 +292,7 @@ export default function ChallengesTab({ viewMode }) {
             const pct =
               stat.total > 0 ? Math.round((stat.solved / stat.total) * 100) : 0;
             return (
-              <Card
-                key={stat.id}
-                as="div"
-                className="rounded-xl bg-slate-950/70 px-3 py-2 shadow-none"
-              >
+              <Panel key={stat.id} className="bg-slate-950/70 px-3 py-2">
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-semibold text-slate-200">
                     {stat.name}
@@ -310,7 +307,7 @@ export default function ChallengesTab({ viewMode }) {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-              </Card>
+              </Panel>
             );
           })}
         </div>

@@ -1,6 +1,7 @@
 // src/components/scores/TeamLeaderboard.jsx
 import React, { useEffect, useState } from "react";
 import Skeleton from "../ui/Skeleton.jsx";
+import Card from "../ui/Card.jsx";
 import { fetchScores } from "../../api/scoreboard.js";
 import { TEAM_CONFIG } from "../../content/dashboardContent.js";
 
@@ -38,7 +39,7 @@ export default function TeamLeaderboard({ viewMode }) {
   const isInstructor = viewMode === "instructor";
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
+    <Card as="section">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-slate-100">
@@ -58,9 +59,10 @@ export default function TeamLeaderboard({ viewMode }) {
       {loading && (
         <div className="mt-3 grid gap-3 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <div
+            <Card
+              as="div"
               key={i}
-              className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-3"
+              className="flex flex-col px-3 py-3 bg-slate-950/70"
               aria-hidden
             >
               <Skeleton width="w-24" height="h-4" className="bg-slate-700" />
@@ -74,7 +76,7 @@ export default function TeamLeaderboard({ viewMode }) {
                   className="bg-slate-800"
                 />
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -103,9 +105,10 @@ export default function TeamLeaderboard({ viewMode }) {
                 : `${index + 1}th`;
 
             return (
-              <div
+              <Card
+                as="div"
                 key={key}
-                className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-3"
+                className="flex flex-col px-3 py-3 bg-slate-950/70"
                 tabIndex={0}
                 role="group"
                 aria-label={`${cfg.label} ${pts} points`}
@@ -135,11 +138,11 @@ export default function TeamLeaderboard({ viewMode }) {
                     }}
                   />
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
       )}
-    </section>
+    </Card>
   );
 }

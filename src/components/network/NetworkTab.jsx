@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
+import Card from "../ui/Card.jsx";
 import { fetchNetworkFromScoreboard } from "../../api/scoreboard.js";
 import { fetchHealth } from "../../api/telemetry.js";
 import NodeDetailPanel from "./NodeDetailPanel.jsx";
@@ -78,8 +79,8 @@ export default function NetworkTab({ viewMode }) {
   const isLoading = network.length === 0;
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
+    <Card className="space-y-4">
+      <Card as="section">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-slate-100">
@@ -116,7 +117,10 @@ export default function NetworkTab({ viewMode }) {
           </div>
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-xl border border-slate-800">
+        <Card
+          as="div"
+          className="mt-3 overflow-hidden rounded-xl border border-slate-800 shadow-none"
+        >
           <table className="min-w-full text-xs">
             <thead className="bg-slate-950/60 text-slate-400">
               <tr>
@@ -236,8 +240,8 @@ export default function NetworkTab({ viewMode }) {
               )}
             </tbody>
           </table>
-        </div>
-      </section>
+        </Card>
+      </Card>
 
       {/* Node detail panel - shared with Overview */}
       <NodeDetailPanel
@@ -255,6 +259,6 @@ export default function NetworkTab({ viewMode }) {
 
       {/* Instructor-only placeholder for future tools */}
       {isInstructor && <InstructorTools section="Network" />}
-    </div>
+    </Card>
   );
 }

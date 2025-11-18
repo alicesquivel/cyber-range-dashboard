@@ -1,4 +1,5 @@
 import React from "react";
+import Card from "../ui/Card.jsx";
 
 const NAV_ITEMS = [
   {
@@ -32,7 +33,7 @@ export default function Sidebar({ activeTab, onChange, viewMode }) {
   return (
     <aside className="hidden w-64 shrink-0 md:block">
       <div className="sticky top-4 space-y-4">
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
+        <Card className="px-4 py-3 bg-slate-950/70 shadow-none">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
             Range navigation
           </p>
@@ -45,7 +46,7 @@ export default function Sidebar({ activeTab, onChange, viewMode }) {
               {viewMode === "student" ? "Student" : "Instructor"}
             </span>
           </p>
-        </div>
+        </Card>
 
         <nav className="space-y-1">
           {NAV_ITEMS.map((item) => {
