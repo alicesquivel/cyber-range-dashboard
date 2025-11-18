@@ -1,5 +1,6 @@
 // src/components/scores/ScoresTab.jsx
 import React, { useEffect, useState, useMemo } from "react";
+import Card from "../ui/Card.jsx";
 import Skeleton from "../ui/Skeleton.jsx";
 import { fetchScoreSummary, fetchScoreEvents } from "../../api/scoreboard.js";
 import TeamLeaderboard from "./TeamLeaderboard.jsx";
@@ -50,9 +51,9 @@ export default function ScoresTab({ viewMode }) {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <Card className="space-y-4">
       {/* Banner */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-xs text-slate-300">
+      <Card className="px-4 py-3 text-xs text-slate-300 bg-slate-950/60 shadow-none">
         {isInstructor ? (
           <p>
             Instructor view - use this tab to track how uptime, attack
@@ -65,13 +66,13 @@ export default function ScoresTab({ viewMode }) {
             bonus points your team earns for good incident reporting.
           </p>
         )}
-      </section>
+      </Card>
 
       {/* Leaderboard */}
       <TeamLeaderboard viewMode={viewMode} />
 
       {/* Score summary */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
+      <Card as="section">
         <h2 className="text-sm font-semibold text-slate-100">Score summary</h2>
         <p className="mt-1 text-xs text-slate-400">
           Score = uptime − attack penalties + report bonus. These values are
@@ -86,7 +87,10 @@ export default function ScoresTab({ viewMode }) {
         )}
 
         {!loading && summary && (
-          <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-4 text-sm">
+          <Card
+            as="div"
+            className="mt-4 p-4 text-sm shadow-none bg-slate-950/70"
+          >
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1 text-xs text-slate-300">
                 <div className="flex items-center justify-between gap-4">
@@ -115,12 +119,12 @@ export default function ScoresTab({ viewMode }) {
                 </p>
               </div>
             </div>
-          </div>
+          </Card>
         )}
-      </section>
+      </Card>
 
       {/* Score events */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
+      <Card as="section">
         <h2 className="text-sm font-semibold text-slate-100">Score events</h2>
         <p className="mt-1 text-xs text-slate-400">
           Each row represents a change to the score - either automatic (from
@@ -140,7 +144,10 @@ export default function ScoresTab({ viewMode }) {
         )}
 
         {!loading && (
-          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70">
+          <Card
+            as="div"
+            className="mt-3 overflow-x-auto bg-slate-950/70 shadow-none"
+          >
             <table className="min-w-full text-left text-xs text-slate-200">
               <thead className="bg-slate-900/80 text-[11px] uppercase tracking-wide text-slate-400">
                 <tr>
@@ -182,9 +189,9 @@ export default function ScoresTab({ viewMode }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </Card>
         )}
-      </section>
-    </div>
+      </Card>
+    </Card>
   );
 }

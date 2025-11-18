@@ -1,5 +1,6 @@
 // src/components/docs/DocsTab.jsx
 import React from "react";
+import Card from "../components/ui/Card.jsx";
 import {
   START_HERE,
   STUDENT_DOCS,
@@ -13,9 +14,9 @@ export default function DocsTab({ viewMode }) {
   const instructorDocs = INSTRUCTOR_DOCS;
 
   return (
-    <div className="space-y-4">
+    <Card className="space-y-4">
       {/* Intro banner */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-xs text-slate-300">
+      <Card className="bg-slate-950/70 px-4 py-3 text-xs text-slate-300 shadow-none">
         {isInstructor ? (
           <p>
             Documentation hub for the Cyber Range. Use this page to share
@@ -28,10 +29,10 @@ export default function DocsTab({ viewMode }) {
             dashboard, and where to find the handouts you need for each lab.
           </p>
         )}
-      </div>
+      </Card>
 
       {/* Start here section */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+      <Card as="section">
         <h2 className="text-sm font-semibold text-slate-100">Start here</h2>
         <p className="mt-1 text-xs text-slate-400">
           A quick overview of the range and how the dashboard fits into your
@@ -43,12 +44,12 @@ export default function DocsTab({ viewMode }) {
             <DocCard key={item.id} title={item.title} body={item.body} />
           ))}
         </div>
-      </section>
+      </Card>
 
       {/* Student / Instructor sections */}
       <section className="grid gap-4 md:grid-cols-2">
         {/* Student section – always visible */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+        <Card>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-100">
               Student resources
@@ -70,10 +71,10 @@ export default function DocsTab({ viewMode }) {
               />
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Instructor section – only in instructor view */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+        <Card>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-100">
               Instructor resources
@@ -106,9 +107,9 @@ export default function DocsTab({ viewMode }) {
               instructor may share selected diagrams or notes from this column.
             </p>
           )}
-        </div>
+        </Card>
       </section>
-    </div>
+    </Card>
   );
 }
 

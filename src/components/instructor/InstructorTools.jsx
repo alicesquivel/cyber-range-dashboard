@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Card from "../ui/Card.jsx";
 
 /*
   Instructor-only tools panel.
@@ -134,7 +135,7 @@ export default function InstructorTools({ section }) {
   }
 
   return (
-    <section className="relative rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
+    <Card as="section" className="relative bg-slate-900/60 p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="text-sm font-semibold text-slate-100">
@@ -156,7 +157,7 @@ export default function InstructorTools({ section }) {
       </div>
 
       {showHelp && (
-        <div className="mt-3 rounded-xl border border-slate-700 bg-slate-950/70 p-3">
+        <Card className="mt-3 p-3">
           <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
             How to use these tools
           </h3>
@@ -166,7 +167,7 @@ export default function InstructorTools({ section }) {
             handouts here. For example: range overview, scoring rules, or
             troubleshooting checklist.
           </p>
-        </div>
+        </Card>
       )}
 
       {/* Action buttons */}
@@ -196,7 +197,7 @@ export default function InstructorTools({ section }) {
       )}
 
       {/* Action log */}
-      <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+      <Card className="mt-4 p-3">
         <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
           Recent instructor actions (simulated)
         </h3>
@@ -214,12 +215,12 @@ export default function InstructorTools({ section }) {
             ))}
           </ul>
         )}
-      </div>
+      </Card>
 
       {/* Confirmation modal */}
       {pendingAction && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-slate-950/80">
-          <div className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-4 shadow-lg">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/80">
+          <Card className="w-full max-w-sm p-4 shadow-lg" as="div">
             <h3 className="text-sm font-semibold text-slate-100">
               Confirm instructor action
             </h3>
@@ -261,9 +262,9 @@ export default function InstructorTools({ section }) {
                 Confirm
               </button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
-    </section>
+    </Card>
   );
 }

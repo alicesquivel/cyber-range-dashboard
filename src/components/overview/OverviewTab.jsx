@@ -31,9 +31,9 @@ function OverviewTab({ viewMode }) {
   }
 
   return (
-    <div className="space-y-8">
+    <Card className="space-y-8">
       {/* Context ribbon */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-xs text-slate-300">
+      <Card className="px-4 py-3 text-xs text-slate-300 bg-slate-900/60 shadow-none">
         {isInstructor ? (
           <p>
             Instructor view – use this to monitor node health, team readiness,
@@ -45,10 +45,10 @@ function OverviewTab({ viewMode }) {
             node as you move through the labs.
           </p>
         )}
-      </div>
+      </Card>
 
       {/* Network map section */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+      <Card as="section">
         <SectionHeader
           title="Network map"
           subtitle="Snapshot of the core Raspberry Pi nodes in this range."
@@ -95,10 +95,10 @@ function OverviewTab({ viewMode }) {
             </Card>
           ))}
         </div>
-      </section>
+      </Card>
 
       {/* Team readiness section */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+      <Card as="section">
         <SectionHeader
           title="Team readiness"
           subtitle="Scores converted to a simple 0–100 scale so teams can compare progress at a glance."
@@ -108,9 +108,10 @@ function OverviewTab({ viewMode }) {
 
         <div className="mt-3 grid gap-4 md:grid-cols-4">
           {teams.map((team) => (
-            <div
+            <Card
+              as="div"
               key={team.name}
-              className="flex flex-col rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3"
+              className="flex flex-col px-4 py-3 bg-slate-900/80"
             >
               <h3 className="text-sm font-semibold text-slate-100">
                 {team.name}
@@ -124,13 +125,13 @@ function OverviewTab({ viewMode }) {
               <p className="mt-2 text-[11px] text-slate-400">
                 {team.score} pts • {team.readiness}% readiness
               </p>
-            </div>
+            </Card>
           ))}
         </div>
-      </section>
+      </Card>
 
       {/* Node details section */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+      <Card as="section">
         <SectionHeader
           title="Node details"
           subtitle="In a live deployment, selecting a node in the network map or table would show detailed metrics here."
@@ -138,13 +139,16 @@ function OverviewTab({ viewMode }) {
           <span>Read-only demo state</span>
         </SectionHeader>
 
-        <div className="mt-3 rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-6 text-sm text-slate-400">
+        <Card
+          className="mt-3 border-dashed px-4 py-6 text-sm text-slate-400 bg-slate-900/60"
+          as="div"
+        >
           Select a node in the Network & Nodes tab or in the map to view more
           information about its role in the range, recent events, and health
           metrics.
-        </div>
-      </section>
-    </div>
+        </Card>
+      </Card>
+    </Card>
   );
 }
 

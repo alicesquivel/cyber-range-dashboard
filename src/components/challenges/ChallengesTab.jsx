@@ -221,9 +221,9 @@ export default function ChallengesTab({ viewMode }) {
     CHALLENGES.find((c) => c.id === activeChallengeId) || null;
 
   return (
-    <div className="space-y-4">
+    <Card className="space-y-4">
       {/* Role banner */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-xs text-slate-300">
+      <Card className="bg-slate-950/70 px-4 py-3 text-xs text-slate-300 shadow-none">
         {isInstructor ? (
           <p>
             Instructor view. Use this tab to manage challenge visibility
@@ -238,10 +238,10 @@ export default function ChallengesTab({ viewMode }) {
             official scoreboard.
           </p>
         )}
-      </div>
+      </Card>
 
       {/* Progress summary + per-pack bars + preview toggle */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+      <Card as="section">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-slate-100">
@@ -291,9 +291,10 @@ export default function ChallengesTab({ viewMode }) {
             const pct =
               stat.total > 0 ? Math.round((stat.solved / stat.total) * 100) : 0;
             return (
-              <div
+              <Card
                 key={stat.id}
-                className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2"
+                as="div"
+                className="rounded-xl bg-slate-950/70 px-3 py-2 shadow-none"
               >
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-semibold text-slate-200">
@@ -309,14 +310,14 @@ export default function ChallengesTab({ viewMode }) {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
-      </section>
+      </Card>
 
       {/* Filters */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+      <Card as="section">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex flex-col text-xs text-slate-300">
             <span className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
@@ -352,7 +353,7 @@ export default function ChallengesTab({ viewMode }) {
             </select>
           </div>
         </div>
-      </section>
+      </Card>
 
       {/* Challenge list */}
       <section className="space-y-4">
@@ -544,6 +545,6 @@ export default function ChallengesTab({ viewMode }) {
           );
         })}
       </section>
-    </div>
+    </Card>
   );
 }
