@@ -55,6 +55,13 @@ export default function NetworkTab({ viewMode }) {
           setLastUpdated(new Date().toISOString());
         }
       } catch (err) {
+        // INTEGRATION NOTE:
+        // If students implement the aggregator, ensure `fetchNetworkFromScoreboard`
+        // returns an array of nodes with { name, ip, vlan, ... } and `fetchHealth`
+        // returns health objects with { ip, status, lastSeen }.
+        // Place live integration work inside `src/api/scoreboard.js` and
+        // `src/api/telemetry.js` — change implementation there so the UI code
+        // here does not need to be modified.
         console.warn("NetworkTab polling error:", err);
       }
     }

@@ -56,6 +56,13 @@ export default function ChallengeDetailDrawer({
     }
 
     // Demo: accept anything that matches FLAG{something}
+    // INTEGRATION NOTE:
+    // Replace this demo client-side check by calling the real scoreboard API.
+    // Students should update `src/api/flags.js` to POST to `/api/flags` and
+    // return a JSON response { status, message }. Example:
+    // const resp = await submitFlag(challenge.id, flagGuess);
+    // setFlagStatus({ ok: resp.status === 'correct', message: resp.message });
+    // if (resp.status === 'correct' && onMarkSolved) onMarkSolved();
     if (/^FLAG\{.+\}$/i.test(flagGuess.trim())) {
       setFlagStatus({
         ok: true,

@@ -1,0 +1,225 @@
+openapi: 3.0.0
+info:
+  title: CyberRange Aggregator (Minimal)
+  version: "0.1.0"
+  description: |-
+    Minimal OpenAPI spec for the CyberRange aggregator used by the
+    frontend. This is intentionally small — students should extend it
+    as they implement the backend.
+servers:
+  - url: http://localhost:8000
+paths:
+  /api/nodes:
+    get:
+      summary: List nodes
+      responses:
+        "200":
+          description: Array of nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Node"
+
+  /api/nodes/{node_id}/metrics:
+    get:
+      summary: Get recent metrics for a node
+      parameters:
+        - name: node_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Array of telemetry datapoints
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelemetryPoint"
+
+  /api/scores:
+    get:
+      summary: Get scoreboard totals
+      responses:
+        "200":
+          description: Scores object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scores"
+
+  /api/scores/summary:
+    get:
+      summary: Get a summary of scoring (uptime, penalties, bonuses)
+      responses:
+        "200":
+          description: Score summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uptime:
+                    type: integer
+                  penalties:
+                    type: integer
+                  reportBonus:
+                    type: integer
+                  total:
+                    type: integer
+
+  /api/scores/events:
+    get:
+      summary: Recent score events
+      responses:
+        "200":
+          description: Array of score events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScoreEvent"
+
+  /api/network:
+    get:
+      summary: Network topology / nodes (scoreboard view)
+      responses:
+        "200":
+          description: Array of nodes in scoreboard format
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Node"
+
+  /api/flags:
+    post:
+      summary: Submit a flag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                teamId:
+                  type: string
+                challengeId:
+                  type: string
+                flag:
+                  type: string
+      responses:
+        "200":
+          description: Flag check response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+
+  /api/telemetry:
+    post:
+      summary: Push telemetry from a Pi agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/TelemetryEnvelope"
+                - $ref: "#/components/schemas/TelemetryPoint"
+      responses:
+        "200":
+          description: accepted
+
+  /api/telemetry/subscribe:
+    get:
+      summary: Subscribe to realtime telemetry (SSE)
+      responses:
+        "200":
+          description: Server-sent events stream
+components:
+  schemas:
+    Node:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        ip:
+          type: string
+        vlan:
+          type: integer
+        role:
+          type: string
+
+    TelemetryPoint:
+      type: object
+      description: Raw telemetry datapoint (agent payload)
+      properties:
+        nodeId:
+          type: string
+        host:
+          type: string
+        ip:
+          type: string
+        ts:
+          type: integer
+        cpu:
+          type: number
+        memFreeMb:
+          type: number
+        rx:
+          type: number
+        tx:
+          type: number
+      additionalProperties: true
+
+    TelemetryEnvelope:
+      type: object
+      description: Wrapper expected by some aggregator implementations
+      properties:
+        nodeId:
+          type: string
+        payload:
+          $ref: "#/components/schemas/TelemetryPoint"
+
+    Scores:
+      type: object
+      additionalProperties:
+        type: integer
+
+    ScoreEvent:
+      type: object
+      properties:
+        time:
+          type: string
+        team:
+          type: string
+        delta:
+          type: integer
+        category:
+          type: string
+        reason:
+          type: string
